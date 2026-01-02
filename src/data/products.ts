@@ -10,7 +10,7 @@ export const products: Product[] = [
     unitLabel: 'Box',
     unit: '3 liter per förpackning',
     category: 'lemonade',
-    image: '/Citronlemonad.jpeg',
+    image: '/drinkmix.github.io//Citronlemonad.jpeg',
   },
   {
     id: '2',
@@ -22,7 +22,7 @@ export const products: Product[] = [
     unitLabel: 'Box',
     unit: '3 liter per förpacking',
     category: 'lemonade',
-    image: '/Jordgubbslemonad3-liter.jpeg',
+    image: '/drinkmix.github.io//Jordgubbslemonad3-liter.jpeg',
   },
   {
     id: '3',
@@ -34,7 +34,7 @@ export const products: Product[] = [
     unitLabel: 'Flaska',
     unit: '24 stycken per flak',
     category: 'Sockerlag',
-    image: '/Sockerlag-original.jpeg',
+    image: '/drinkmix.github.io//Sockerlag-original.jpeg',
   },
   {
     id: '4',
@@ -46,7 +46,7 @@ export const products: Product[] = [
     unitLabel: 'Flaska',
     unit: '24 stycken per flak',
     category: 'Sockerlag',
-    image: '/Sockerlag-Farska-Hallon.jpeg',
+    image: '/drinkmix.github.io//Sockerlag-Farska-Hallon.jpeg',
   },
   {
     id: '5',
@@ -58,7 +58,7 @@ export const products: Product[] = [
     unitLabel: 'Flaska',
     unit: '24 stycken per flak',
     category: 'Sockerlag',
-    image: '/Sockerlag-rabarber.jpeg',
+    image: '/drinkmix.github.io//Sockerlag-rabarber.jpeg',
   },
   {
     id: '6',
@@ -70,7 +70,7 @@ export const products: Product[] = [
     unitLabel: 'Flaska',
     unit: '24 stycken per flak',
     category: 'Sockerlag',
-    image: '/Sockerlag-mynta.jpeg',
+    image: '/drinkmix.github.io//Sockerlag-mynta.jpeg',
   },
   {
     id: '7',
@@ -82,7 +82,7 @@ export const products: Product[] = [
     unitLabel: 'Flaska',
     unit: '24 stycken per flak',
     category: 'Sockerlag',
-    image: '/Sockerlag-havtorn.jpeg',
+    image: '/drinkmix.github.io//Sockerlag-havtorn.jpeg',
   },
   {
     id: '8',
@@ -94,7 +94,7 @@ export const products: Product[] = [
     unitLabel: 'Flaska',
     unit: '6 stycken per låda',
     category: 'liquers',
-    image: '/Cascara.jpeg',
+    image: '/drinkmix.github.io//Cascara.jpeg',
   },
   {
     id: '9',
@@ -106,7 +106,7 @@ export const products: Product[] = [
     unitLabel: 'Flaska',
     unit: '6 stycken per låda',
     category: 'liquers',
-    image: '/Limoncello.jpeg',
+    image: '/drinkmix.github.io//Limoncello.jpeg',
    
   },
   {
@@ -119,7 +119,7 @@ export const products: Product[] = [
     unitLabel: 'Flaska',
     unit: '24 stycken per flak',
     category: 'lemonade',
-    image: '/Jordgubbslemonad.jpeg',
+    image: '/drinkmix.github.io//Jordgubbslemonad.jpeg',
    
   },
   {
@@ -132,7 +132,7 @@ export const products: Product[] = [
     unitLabel: 'Flaska',
     unit: '24 stycken per flak',
     category: 'lemonade',
-    image: '/Citron:Ingefaralemonad.jpeg',
+    image: '/drinkmix.github.io//Citron-Ingefaralemonad.jpeg',
   },
   {
     id: '12',
@@ -144,7 +144,7 @@ export const products: Product[] = [
     unitLabel: 'Box',
     unit: '3 liter per förpackning',
     category: 'lemonade',
-    image: '/Citronlemonad.jpeg',
+    image: '/drinkmix.github.io//Citronlemonad.jpeg',
     showInAll: false,  
 
   },
@@ -158,7 +158,7 @@ export const products: Product[] = [
     unitLabel: 'Box',
     unit: '3 liter per förpacking',
     category: 'lemonade',
-    image: '/Jordgubbslemonad3-liter.jpeg',
+    image: '/drinkmix.github.io//Jordgubbslemonad3-liter.jpeg',
     showInAll: false,  
   },
   {
@@ -171,7 +171,7 @@ export const products: Product[] = [
     unitLabel: 'Flaska',
     unit: '24 stycken per flak',
     category: 'lemonade',
-    image: '/Jordgubbslemonad.jpeg',
+    image: '/drinkmix.github.io//Jordgubbslemonad.jpeg',
     showInAll: false,  
   },
   {
@@ -184,7 +184,7 @@ export const products: Product[] = [
     unitLabel: 'Flaska',
     unit: '24 stycken per flak',
     category: 'lemonade',
-    image: '/Citron:Ingefaralemonad.jpeg',
+    image: '/drinkmix.github.io//Citron-Ingefaralemonad.jpeg',
     showInAll: false,  
   },
 ]
@@ -194,76 +194,76 @@ export const products: Product[] = [
     name: 'Citronlemonad box',
     price: 720,
     category: 'Produktbilder',
-    image: '/Citronlemonad.jpeg',
+    image: '/drinkmix.github.io//Citronlemonad.jpeg',
   },
   {
     id: '2',
     name: 'Jordgubbslemonad box',    
     price: 720,
     category: 'Produktbilder',
-    image: '/Jordgubbslemonad3-liter.jpeg',
+    image: '/drinkmix.github.io//Jordgubbslemonad3-liter.jpeg',
   },
   {
     id: '3',
     name: 'Sockerlag original',
     price: 480,
     category: 'Produktbilder',
-    image: '/Sockerlag-original.jpeg',
+    image: '/drinkmix.github.io//Sockerlag-original.jpeg',
   },
   {
     id: '4',
     name: 'Sockerlag Färska Hallon',
     price: 480,
     category: 'Produktbilder',
-    image: '/Sockerlag-Farska-Hallon.jpeg',
+    image: '/drinkmix.github.io//Sockerlag-Farska-Hallon.jpeg',
   },
   {
     id: '5',
     name: 'Sockerlag Rabarber',
     price: 480,
     category: 'Produktbilder',
-    image: '/Sockerlag-rabarber.jpeg',
+    image: '/drinkmix.github.io//Sockerlag-rabarber.jpeg',
   },
   {
     id: '6',
     name: 'Sockerlag Mynta',
     price: 480,
     category: 'Produktbilder',
-    image: '/Sockerlag-mynta.jpeg',
+    image: '/drinkmix.github.io//Sockerlag-mynta.jpeg',
   },
   {
     id: '7',
     name: 'Sockerlag Havtorn',
     price: 480,
     category: 'Produktbilder',
-    image: '/Sockerlag-havtorn.jpeg',
+    image: '/drinkmix.github.io//Sockerlag-havtorn.jpeg',
   },
   {
     id: '8',
     name: 'Cascara',
     price: 1674,
     category: 'Produktbilder',
-    image: '/Cascara.jpeg',
+    image: '/drinkmix.github.io//Cascara.jpeg',
   },
   {
     id: '9',
     name: 'Limoncello',
     price: 1674,
     category: 'Produktbilder',
-    image: '/Limoncello.jpeg',
+    image: '/drinkmix.github.io//Limoncello.jpeg',
   },
   {
     id: '10',
     name: 'Jordgubbslemonad',
     price: 480,
     category: 'Produktbilder',
-    image: '/Jordgubbslemonad.jpeg',
+    image: '/drinkmix.github.io//Jordgubbslemonad.jpeg',
   },
   {
     id: '11',
     name: 'Citron/ingefäralemonad',
     price: 480,
     category: 'Produktbilder',
-    image: '/Citron:Ingefaralemonad.jpeg',
+    image: '/drinkmix.github.io//Citron-Ingefaralemonad.jpeg',
   }
 ];

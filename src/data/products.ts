@@ -10,7 +10,7 @@ export const products: Product[] = [
     unitLabel: 'Box',
     unit: '3 liter per förpackning',
     category: 'lemonade',
-    image: '/drinkmix.github.io//Citronlemonad.jpeg',
+    image: '/drinkmix.github.io/Citronlemonad.jpeg',
   },
   {
     id: '2',

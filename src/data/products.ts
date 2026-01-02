@@ -243,7 +243,7 @@ export const products: Product[] = [
     name: 'Cascara',
     price: 1674,
     category: 'Produktbilder',
-    image: '/drinkmix.github.io//Cascara.jpeg',
+    image: '/public/Cascara.jpeg',
   },
   {
     id: '9',

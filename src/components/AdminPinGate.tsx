@@ -7,7 +7,7 @@ const PIN_KEY = 'drinkmix_admin_pin_v1';
 const SESSION_KEY = 'drinkmix_admin_session_v1';
 
 function getPin(): string {
-  return localStorage.getItem(PIN_KEY) ?? '1234';
+  return localStorage.getItem(PIN_KEY) ?? "";
 }
 
 function setSessionActive(active: boolean) {

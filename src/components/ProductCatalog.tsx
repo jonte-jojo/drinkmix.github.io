@@ -66,13 +66,10 @@ export const ProductCatalog = ({
                   Order ({totalItems} flak) - {totalPrice} kr
                 </Button>
               )}
-              
               <Button variant="outline" size="lg" onClick={onOpenAdmin} className="gap-2">
                 <Settings className="w-5 h-5" />
                 Admin
               </Button>
-
-              
             </div>
           </div>
         </div>

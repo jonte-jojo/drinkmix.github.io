@@ -56,7 +56,12 @@ export const ProductCatalog = ({
             </div>
 
             <div className="flex items-center gap-3">
-            {totalItems > 0 && (
+              <Button variant="outline" size="lg" onClick={onOpenAdmin} className="gap-2">
+                <Settings className="w-5 h-5" />
+                Admin
+              </Button>
+
+              {totalItems > 0 && (
                 <Button
                   onClick={onProceedToOrder}
                   size="lg"
@@ -66,10 +71,6 @@ export const ProductCatalog = ({
                   Order ({totalItems} flak) - {totalPrice} kr
                 </Button>
               )}
-              <Button variant="outline" size="lg" onClick={onOpenAdmin} className="gap-2">
-                <Settings className="w-5 h-5" />
-                Admin
-              </Button>
             </div>
           </div>
         </div>

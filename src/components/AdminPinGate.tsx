@@ -7,7 +7,7 @@ const PIN_KEY = 'drinkmix_admin_pin_v1';
 const SESSION_KEY = 'drinkmix_admin_session_v1';
 
 function getPin(): string {
-  return localStorage.getItem(PIN_KEY) ?? "";
+  return localStorage.getItem(PIN_KEY) ?? "1234";
 }
 
 function setSessionActive(active: boolean) {
@@ -55,11 +55,9 @@ export function AdminPinGate({ onSuccess, onCancel }: { onSuccess: () => void; o
               onChange={(e) => setPin(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && submit()}
               className="h-12 text-lg"
-              placeholder="••••"
             />
             {err && <div className="text-sm text-destructive">{err}</div>}
             <div className="text-xs text-muted-foreground">
-              Default PIN is <span className="font-medium">1234</span>.
             </div>
           </div>
 

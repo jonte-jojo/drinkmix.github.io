@@ -108,23 +108,6 @@ export const ProductCatalog = ({
 </TabsContent>
         </Tabs>
       </div>
-
-      {totalItems > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-card shadow-2xl rounded-2xl border border-border p-4 flex items-center gap-6 z-50">
-          <div className="text-center">
-            <span className="text-sm text-muted-foreground">Items</span>
-            <p className="text-2xl font-bold text-foreground">{totalItems}</p>
-          </div>
-          <div className="h-12 w-px bg-border" />
-          <div className="text-center">
-            <span className="text-sm text-muted-foreground">Total</span>
-            <p className="text-2xl font-bold text-secondary">{totalPrice} kr</p>
-          </div>
-          <Button onClick={onProceedToOrder} size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground ml-2">
-            Create Order
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

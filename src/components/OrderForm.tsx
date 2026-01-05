@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SignaturePad } from './SignaturePad';
 import { ArrowLeft, Send, Building2, User, Mail, Phone, MapPin, FileText, Citrus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import emailjs from "@emailjs/browser";
 
 interface OrderFormProps {
   products: Product[];
@@ -93,7 +94,45 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
 
     // For now, simulate order submission
     // TODO: Replace with actual email sending via edge function
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    try {
+      const orderLines = selectedProducts
+        .map(({ product, quantity }) => `${product.name} - ${quantity} flak`)
+        .join("\n");
+    
+      const emailParams = {
+        to_email: customer.email,
+        company: customer.companyName,
+        contact: customer.contactPerson,
+        order_number: orderNumber,
+        order_date: orderDate,
+        order_details: orderLines,
+        total_price: totalPrice,
+        notes: customer.notes || "No notes",
+      };
+    
+      await emailjs.send(
+        "Jontetest.drinkmix.se",
+        "template_h792ji4",
+        emailParams,
+        "dLeYvzovlKIZTi1fi"
+      );
+    
+      toast({
+        title: "Order Submitted!",
+        description: `Confirmation email sent to ${customer.email}.`,
+      });
+    
+      onOrderComplete();
+    } catch (error) {
+      console.error("Email send failed:", error);
+      toast({
+        title: "Failed to send email",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
 
     toast({
       title: 'Order Submitted!',

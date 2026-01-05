@@ -71,34 +71,32 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    
+  
     if (!signature) {
       toast({
-        title: 'Signature Required',
-        description: 'Please have the customer sign the order before submitting.',
-        variant: 'destructive',
+        title: "Signature Required",
+        description: "Please have the customer sign the order before submitting.",
+        variant: "destructive",
       });
       return;
     }
-
+  
     if (!customer.companyName || !customer.contactPerson || !customer.email) {
       toast({
-        title: 'Missing Information',
-        description: 'Please fill in company name, contact person, and email.',
-        variant: 'destructive',
+        title: "Missing Information",
+        description: "Please fill in company name, contact person, and email.",
+        variant: "destructive",
       });
       return;
     }
-
+  
     setIsSubmitting(true);
-
-    // For now, simulate order submission
-    // TODO: Replace with actual email sending via edge function
+  
     try {
       const orderLines = selectedProducts
         .map(({ product, quantity }) => `${product.name} - ${quantity} flak`)
         .join("\n");
-    
+  
       const emailParams = {
         to_email: customer.email,
         company: customer.companyName,
@@ -106,22 +104,22 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
         order_number: orderNumber,
         order_date: orderDate,
         order_details: orderLines,
-        total_price: totalPrice,
+        total_price: `${totalPrice} kr`,
         notes: customer.notes || "No notes",
       };
-    
+      console.log("SENDING EMAIL", emailParams);
       await emailjs.send(
-        "Jontetest.drinkmix.se",
-        "template_h792ji4",
+        "Jontetest.drinkmix.se",     // ✅ your SERVICE_ID
+        "template_h792ji4",          // ✅ your TEMPLATE_ID
         emailParams,
-        "dLeYvzovlKIZTi1fi"
+        "dLeYvzovlKIZTi1fi"          // ✅ your PUBLIC_KEY
       );
-    
+      console.log("EMAIL SENT SUCCESSFULLY");
       toast({
         title: "Order Submitted!",
         description: `Confirmation email sent to ${customer.email}.`,
       });
-    
+  
       onOrderComplete();
     } catch (error) {
       console.error("Email send failed:", error);
@@ -133,14 +131,6 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
     } finally {
       setIsSubmitting(false);
     }
-
-    toast({
-      title: 'Order Submitted!',
-      description: `Order for ${customer.companyName} has been sent successfully.`,
-    });
-
-    setIsSubmitting(false);
-    onOrderComplete();
   };
 
   const orderDate = new Date().toLocaleDateString('sv-SE', {

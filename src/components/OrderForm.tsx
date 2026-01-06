@@ -9,6 +9,7 @@ import { SignaturePad } from './SignaturePad';
 import { ArrowLeft, Send, Building2, User, Mail, Phone, MapPin, FileText, Citrus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import emailjs from "@emailjs/browser";
+import { supabase } from "@/lib/supabase";
 
 interface OrderFormProps {
   products: Product[];
@@ -68,7 +69,13 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
       });
     }
   };
+  const orderDate = new Date().toLocaleDateString('sv-SE', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 
+  const orderNumber = `DM-${Date.now().toString().slice(-6)}`;
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
   
@@ -93,6 +100,58 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
     setIsSubmitting(true);
   
     try {
+      // ✅ 1) SAVE CUSTOMER
+      const { data: customerData, error: customerError } = await supabase
+        .from("customers")
+        .insert([
+          {
+            company_name: customer.companyName,
+            contact_person: customer.contactPerson,
+            email: customer.email,
+            phone: customer.phone,
+            address: customer.address,
+          },
+        ])
+        .select()
+        .single();
+  
+      if (customerError) throw customerError;
+  
+      // ✅ 2) SAVE ORDER
+      const { data: orderData, error: orderError } = await supabase
+        .from("orders")
+        .insert([
+          {
+            customer_id: customerData.id,
+            order_number: orderNumber,
+            order_date: orderDate,
+            notes: customer.notes,
+            total_price: totalPrice,
+            signature: signature,
+          },
+        ])
+        .select()
+        .single();
+  
+      if (orderError) throw orderError;
+  
+      // ✅ 3) SAVE ORDER ITEMS
+      const itemsToInsert = selectedProducts.map(({ product, quantity }) => ({
+        order_id: orderData.id,
+        product_id: product.id,
+        product_name: product.name,
+        quantity,
+        price_per_case: product.casePrice,
+        case_price: product.casePrice * quantity,
+      }));
+  
+      const { error: itemsError } = await supabase
+        .from("order_items")
+        .insert(itemsToInsert);
+  
+      if (itemsError) throw itemsError;
+  
+      // ✅ 4) SEND EMAIL CONFIRMATION
       const orderLines = selectedProducts
         .map(({ product, quantity }) => `${product.name} - ${quantity} flak`)
         .join("\n");
@@ -107,24 +166,30 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
         total_price: `${totalPrice} kr`,
         notes: customer.notes || "No notes",
       };
+  
       console.log("SENDING EMAIL", emailParams);
+  
       await emailjs.send(
-        "Jontetest.drinkmix.se",     // ✅ your SERVICE_ID
-        "template_h792ji4",          // ✅ your TEMPLATE_ID
+        "Jontetest.drinkmix.se",     // ✅ SERVICE_ID
+        "template_h792ji4",          // ✅ TEMPLATE_ID
         emailParams,
-        "dLeYvzovlKIZTi1fi"          // ✅ your PUBLIC_KEY
+        "dLeYvzovlKIZTi1fi"          // ✅ PUBLIC_KEY
       );
+  
       console.log("EMAIL SENT SUCCESSFULLY");
+  
+      // ✅ DONE
       toast({
         title: "Order Submitted!",
-        description: `Confirmation email sent to ${customer.email}.`,
+        description: `Order saved and confirmation email sent to ${customer.email}.`,
       });
   
       onOrderComplete();
     } catch (error) {
-      console.error("Email send failed:", error);
+      console.error("Order failed:", error);
+  
       toast({
-        title: "Failed to send email",
+        title: "Order failed",
         description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
@@ -132,15 +197,7 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
       setIsSubmitting(false);
     }
   };
-
-  const orderDate = new Date().toLocaleDateString('sv-SE', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-
-  const orderNumber = `DM-${Date.now().toString().slice(-6)}`;
-
+  
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -375,4 +432,4 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
       </form>
     </div>
   );
-};
+              };

@@ -17,10 +17,12 @@ export function AdminProducts({
   products,
   onChangeProducts,
   onClose,
+  onSeeOrders,
 }: {
   products: Product[];
   onChangeProducts: (next: Product[]) => void;
   onClose: () => void;
+  onSeeOrders: () => void;
 }) {
   const [selectedId, setSelectedId] = useState<string | null>(products[0]?.id ?? null);
 
@@ -57,6 +59,7 @@ export function AdminProducts({
     setSelectedId(p.id);
   };
 
+
   const deleteSelected = () => {
     if (!selected) return;
     const next = products.filter((p) => p.id !== selected.id);
@@ -85,7 +88,10 @@ export function AdminProducts({
             </div>
           </div>
 
+          
+
           <div className="flex items-center gap-3">
+            <Button variant='outline' onClick={onSeeOrders} >See old orders</Button>
             <Button variant="outline" onClick={resetToDefault}>Reset to defaults</Button>
             <Button onClick={addProduct} className="gap-2">
               <Plus className="w-5 h-5" />

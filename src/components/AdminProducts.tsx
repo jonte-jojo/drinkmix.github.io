@@ -145,10 +145,6 @@ export function AdminProducts({
                     <Label>Name</Label>
                     <Input value={selected.name} onChange={(e) => updateSelected({ name: e.target.value })} className="h-12" />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label>SKU</Label>
-                  </div>
                 </div>
 
                 <div className="space-y-2">

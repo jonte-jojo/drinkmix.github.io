@@ -8,6 +8,7 @@ import { SeeOldOrders } from "@/components/SeeOldOrders";
 import type { Product } from "@/types/product";
 import { loadOrderItems, saveOrderItems, clearOrderItems } from "@/data/orderStore";
 import { fetchProductsFromDB } from "@/data/productDB";
+import { loadProducts } from "@/data/productsStore";
 
 type AppView = "catalog" | "order" | "success" | "adminPin" | "admin" | "seeOrders";
 
@@ -23,6 +24,7 @@ useEffect(() => {
       setProducts(dbProducts);
     } catch (e) {
       console.error("Failed to load products from DB:", e);
+      setProducts(loadProducts());
     }
   })();
 }, []);

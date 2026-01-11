@@ -6,23 +6,33 @@ import { AdminPinGate } from "@/components/AdminPinGate";
 import { AdminProducts } from "@/components/AdminProducts";
 import { SeeOldOrders } from "@/components/SeeOldOrders";
 import type { Product } from "@/types/product";
-import { loadProducts, saveProducts } from "@/data/productsStore";
 import { loadOrderItems, saveOrderItems, clearOrderItems } from "@/data/orderStore";
+import { fetchProductsFromDB } from "@/data/productDB";
 
 type AppView = "catalog" | "order" | "success" | "adminPin" | "admin" | "seeOrders";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<AppView>("catalog");
   const [orderItems, setOrderItems] = useState<Record<string, number>>(loadOrderItems());
-  const [products, setProducts] = useState<Product[]>(() => loadProducts());
+  const [products, setProducts] = useState<Product[]>([]);
+
+useEffect(() => {
+  (async () => {
+    try {
+      const dbProducts = await fetchProductsFromDB();
+      setProducts(dbProducts);
+    } catch (e) {
+      console.error("Failed to load products from DB:", e);
+    }
+  })();
+}, []);
+
 
   useEffect(() => {
     saveOrderItems(orderItems);
   }, [orderItems]);
 
-  useEffect(() => {
-    saveProducts(products);
-  }, [products]);
+  
 
   const onSeeOrders = () => setCurrentView("seeOrders");
   const onBackFromOrders = () => setCurrentView("catalog");
@@ -93,8 +103,6 @@ const Index = () => {
           onSeeOrders={onSeeOrders}
         />
       )}
-
-      {/* ✅ THIS WAS MISSING */}
       {currentView === "seeOrders" && (
         <SeeOldOrders onBack={onBackFromOrders} />
       )}

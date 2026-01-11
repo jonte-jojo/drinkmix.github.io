@@ -120,14 +120,3 @@ export async function deleteProductFromDB(productId: string): Promise<void> {
   const { error } = await supabase.from("products").delete().eq("id", id);
   if (error) throw error;
 }
-/** One-time seed: insert products that don't exist yet */
-export async function seedProductsToDB(seed: Product[]) {
-    // Convert UI products -> DB rows (without forcing id)
-    const rows = seed.map((p) => {
-      const { id, ...rest } = productToDb(p); // strip id so DB auto-generates
-      return rest;
-    });
-  
-    const { error } = await supabase.from("products").insert(rows);
-    if (error) throw error;
-  }

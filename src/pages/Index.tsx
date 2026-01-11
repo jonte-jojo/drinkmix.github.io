@@ -7,8 +7,10 @@ import { AdminProducts } from "@/components/AdminProducts";
 import { SeeOldOrders } from "@/components/SeeOldOrders";
 import type { Product } from "@/types/product";
 import { loadOrderItems, saveOrderItems, clearOrderItems } from "@/data/orderStore";
-import { fetchProductsFromDB } from "@/data/productDB";
+//import { fetchProductsFromDB } from "@/data/productDB";
 import { loadProducts } from "@/data/productsStore";
+import { products as seedProducts } from "@/data/products"; // wherever your old array is
+import { seedProductsToDB, fetchProductsFromDB } from "@/data/productDB";
 
 type AppView = "catalog" | "order" | "success" | "adminPin" | "admin" | "seeOrders";
 
@@ -29,6 +31,13 @@ useEffect(() => {
   })();
 }, []);
 
+useEffect(() => {
+  (async () => {
+    await seedProductsToDB(seedProducts); // run once, then you can delete this line later
+    const dbProducts = await fetchProductsFromDB();
+    setProducts(dbProducts);
+  })();
+}, []);
 
   useEffect(() => {
     saveOrderItems(orderItems);

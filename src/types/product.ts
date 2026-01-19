@@ -10,6 +10,7 @@ export interface Product {
   category: 'lemonade' | 'liquers' | 'Sockerlag';
   image: string;
   showInAll?: boolean;
+  hasAlcohol: boolean;
 }
 
 export interface OrderItem {

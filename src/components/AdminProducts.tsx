@@ -52,6 +52,7 @@ export function AdminProducts({
       unit: `${caseSize} st per flak`,
       category: 'lemonade',
       image: '/placeholder.svg',
+      hasAlcohol: false,
     };
 
     const next = [p, ...products];

@@ -1,5 +1,5 @@
 import type { Product } from '@/types/product';
-import { products as seedProducts } from '@/data/products';
+
 
 const STORAGE_KEY = 'drinkmix_products_v1';
 
@@ -15,6 +15,11 @@ function normalizeProduct(p: any): Product {
   const caseSize = typeof p.caseSize === 'number' ? p.caseSize : guessCaseSizeFromUnit(p.unit);
 
   const unitLabel = typeof p.unitLabel === 'string' && p.unitLabel.trim() !== '' ? p.unitLabel : 'st';
+
+  const inferredHasAlcohol =
+  typeof p.hasAlcohol === "boolean"
+    ? p.hasAlcohol
+    : /(\balkohol\b|[0-9]+(\.[0-9]+)?\s*%)/i.test(`${p.name ?? ""} ${p.description ?? ""}`);
 
   const unitPrice =
     typeof p.unitPrice === 'number'
@@ -45,6 +50,9 @@ function normalizeProduct(p: any): Product {
     caseSize,
     unitLabel,
     unit,
+    showInAll: typeof p.showInAll === "boolean" ? p.showInAll : true,
+    hasAlcohol: inferredHasAlcohol,
+    
   };
 }
 
@@ -60,15 +68,14 @@ function guessCaseSizeFromUnit(unit?: string): number {
 export function loadProducts(): Product[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return seedProducts;
+    if (!raw) return [];
 
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || parsed.length === 0) return seedProducts;
+    if (!Array.isArray(parsed) || parsed.length === 0) return [];
 
-    // ✅ Normalize each product
     return parsed.map(normalizeProduct);
   } catch {
-    return seedProducts;
+    return [];
   }
 }
 

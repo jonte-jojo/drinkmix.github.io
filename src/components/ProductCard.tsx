@@ -27,15 +27,23 @@ export const ProductCard = ({ product, quantity, onQuantityChange }: ProductCard
     <Card
   onClick={() => navigate(`/product/${product.id}`)}
   className={`cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-xl ${quantity > 0 ? 'ring-2 ring-primary shadow-lg' : ''}`}>
-      <div className="aspect-square bg-gradient-to-br from-citrus-yellow/20 to-citrus-green/20 flex items-center justify-center p-6">
-        <div className="w-full h-full bg-card rounded-lg flex items-center justify-center">
-          <img 
-            src={product.image} 
-            alt={product.name}
-            className="w-3/4 h-3/4 object-contain"
-          />
-        </div>
-      </div>
+      <div className="relative aspect-square bg-gradient-to-br from-citrus-yellow/20 to-citrus-green/20 flex items-center justify-center p-6">
+  <div
+    className={`absolute top-3 right-3 z-10 rounded-full px-3 py-1 text-xs font-semibold shadow-sm ${
+      product.hasAlcohol ? "bg-red-600 text-white" : "bg-emerald-600 text-white"
+    }`}
+  >
+    {product.hasAlcohol ? "5 %" : "Alkoholfri"}
+  </div>
+
+  <div className="w-full h-full bg-card rounded-lg flex items-center justify-center">
+    <img
+      src={product.image}
+      alt={product.name}
+      className="w-3/4 h-3/4 object-contain"
+    />
+  </div>
+</div>
       <CardContent className="p-6">
         <div className="flex items-start justify-between gap-2 mb-2">
           <h3 className="font-heading text-xl font-semibold text-foreground leading-tight">

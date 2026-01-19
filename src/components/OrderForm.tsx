@@ -23,6 +23,7 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [signature, setSignature] = useState('');
+  const [permitFile, setPermitFile] = useState<File | null>(null);
   const [customer, setCustomer] = useState<CustomerInfo>({
     companyName: '',
     contactPerson: '',
@@ -96,6 +97,7 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
       });
       return;
     }
+    
   
     setIsSubmitting(true);
   
@@ -117,6 +119,7 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
   
       if (customerError) throw customerError;
   
+      
       // ✅ 2) SAVE ORDER
       const { data: orderData, error: orderError } = await supabase
         .from("orders")
@@ -128,13 +131,32 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
             notes: customer.notes,
             total_price: totalPrice,
             signature: signature,
+            permit_url: null,
           },
         ])
         .select()
         .single();
   
       if (orderError) throw orderError;
-  
+      let permitUrl: string | null = null;
+
+      if (permitFile) {
+        const ext = permitFile.name.split(".").pop()?.toLowerCase() || "bin";
+        const filePath = `permits/${orderNumber}_${Date.now()}.${ext}`;
+      
+        const { error: uploadError } = await supabase
+          .storage
+          .from("permits")
+          .upload(filePath, permitFile, {
+            upsert: true,
+            contentType: permitFile.type || undefined,
+          });
+      
+        if (uploadError) throw uploadError;
+      
+        const { data } = supabase.storage.from("permits").getPublicUrl(filePath);
+        permitUrl = data.publicUrl;
+      }
       // ✅ 3) SAVE ORDER ITEMS
       const itemsToInsert = selectedProducts.map(({ product, quantity }) => ({
         order_id: orderData.id,
@@ -155,7 +177,8 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
       const orderLines = selectedProducts
         .map(({ product, quantity }) => `${product.name} - ${quantity} flak`)
         .join("\n");
-  
+        
+        
       const emailParams = {
         to_email: customer.email,
         company: customer.companyName,
@@ -336,6 +359,21 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
                 <SignaturePad signature={signature} onSignatureChange={setSignature} />
               </CardContent>
             </Card>
+            <div className="space-y-2">
+  <Label htmlFor="permit">Alkoholtillstånd (bild eller PDF)</Label>
+  <Input
+    id="permit"
+    type="file"
+    accept="image/*,application/pdf"
+    capture="environment"
+    onChange={(e) => setPermitFile(e.target.files?.[0] ?? null)}
+  />
+  {permitFile && (
+    <p className="text-xs text-muted-foreground">
+      Selected: {permitFile.name}
+    </p>
+  )}
+</div>
           </div>
 
           {/* Order Summary */}

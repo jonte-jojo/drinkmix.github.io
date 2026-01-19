@@ -15,6 +15,7 @@ export const products: Product[] = [
     unit: "3 liter per förpackning",
     category: "lemonade",
     image: `${BASE}Citronlemonad.jpeg`,
+    hasAlcohol: false,
   },
   {
     id: "2",
@@ -28,6 +29,8 @@ export const products: Product[] = [
     unit: "3 liter per förpacking",
     category: "lemonade",
     image: `${BASE}Jordgubbslemonad3-liter.jpeg`,
+    hasAlcohol: false,
+
   },
   {
     id: "3",
@@ -41,6 +44,8 @@ export const products: Product[] = [
     unit: "24 stycken per flak",
     category: "Sockerlag",
     image: `${BASE}Sockerlag-original.jpeg`,
+    hasAlcohol: false,
+
   },
   {
     id: "4",
@@ -54,6 +59,8 @@ export const products: Product[] = [
     unit: "24 stycken per flak",
     category: "Sockerlag",
     image: `${BASE}Sockerlag-Farska-Hallon.jpeg`,
+    hasAlcohol: false,
+
   },
   {
     id: "5",
@@ -67,6 +74,8 @@ export const products: Product[] = [
     unit: "24 stycken per flak",
     category: "Sockerlag",
     image: `${BASE}Sockerlag-rabarber.jpeg`,
+    hasAlcohol: false,
+
   },
   {
     id: "6",
@@ -80,6 +89,8 @@ export const products: Product[] = [
     unit: "24 stycken per flak",
     category: "Sockerlag",
     image: `${BASE}Sockerlag-mynta.jpeg`,
+    hasAlcohol: false,
+
   },
   {
     id: "7",
@@ -92,6 +103,8 @@ export const products: Product[] = [
     unit: "24 stycken per flak",
     category: "Sockerlag",
     image: `${BASE}Sockerlag-havtorn.jpeg`,
+    hasAlcohol: false,
+
   },
   {
     id: "8",
@@ -105,6 +118,8 @@ export const products: Product[] = [
     unit: "6 stycken per låda",
     category: "liquers",
     image: `${BASE}Cascara.jpeg`,
+    hasAlcohol: true,
+
   },
   {
     id: "9",
@@ -118,6 +133,8 @@ export const products: Product[] = [
     unit: "6 stycken per låda",
     category: "liquers",
     image: `${BASE}Limoncello.jpeg`,
+    hasAlcohol: true,
+
   },
   {
     id: "10",
@@ -130,6 +147,8 @@ export const products: Product[] = [
     unit: "24 stycken per flak",
     category: "lemonade",
     image: `${BASE}Jordgubbslemonad.jpeg`,
+    hasAlcohol: false,
+
   },
   {
     id: "11",
@@ -143,6 +162,8 @@ export const products: Product[] = [
     unit: "24 stycken per flak",
     category: "lemonade",
     image: `${BASE}Citron-Ingefaralemonad.jpeg`,
+    hasAlcohol: false,
+
   },
   {
     id: "12",
@@ -157,6 +178,8 @@ export const products: Product[] = [
     category: "lemonade",
     image: `${BASE}Citronlemonad.jpeg`,
     showInAll: false,
+    hasAlcohol: true,
+
   },
   {
     id: "13",
@@ -171,6 +194,8 @@ export const products: Product[] = [
     category: "lemonade",
     image: `${BASE}Jordgubbslemonad3-liter.jpeg`,
     showInAll: false,
+    hasAlcohol: true,
+
   },
   {
     id: "14",
@@ -184,6 +209,8 @@ export const products: Product[] = [
     category: "lemonade",
     image: `${BASE}Jordgubbslemonad.jpeg`,
     showInAll: false,
+    hasAlcohol: true,
+
   },
   {
     id: "15",
@@ -198,6 +225,8 @@ export const products: Product[] = [
     category: "lemonade",
     image: `${BASE}Citron-Ingefaralemonad.jpeg`,
     showInAll: false,
+    hasAlcohol: true,
+
   },
 ];
 

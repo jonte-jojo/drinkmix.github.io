@@ -3,42 +3,39 @@ import { ProductCatalog } from "@/components/ProductCatalog";
 import { OrderForm } from "@/components/OrderForm";
 import { OrderSuccess } from "@/components/OrderSuccess";
 import { AdminPinGate } from "@/components/AdminPinGate";
-import { AdminProducts } from "@/components/AdminProducts";
-import { SeeOldOrders } from "@/components/SeeOldOrders";
+import { AdminCustomerOrders } from "@/components/AdminCustomerOrders";
+
 import type { Product } from "@/types/product";
 import { loadOrderItems, saveOrderItems, clearOrderItems } from "@/data/orderStore";
 import { fetchProductsFromDB } from "@/data/productDB";
 import { loadProducts } from "@/data/productsStore";
 
-
-type AppView = "catalog" | "order" | "success" | "adminPin" | "admin" | "seeOrders";
+type AppView = "catalog" | "order" | "success" | "adminPin" | "admin";
 
 const Index = () => {
   const [currentView, setCurrentView] = useState<AppView>("catalog");
   const [orderItems, setOrderItems] = useState<Record<string, number>>(loadOrderItems());
   const [products, setProducts] = useState<Product[]>([]);
 
-useEffect(() => {
-  (async () => {
-    try {
-      const dbProducts = await fetchProductsFromDB();
-      setProducts(dbProducts);
-    } catch (e) {
-      console.error("Failed to load products from DB:", e);
-      setProducts(loadProducts());
-    }
-  })();
-}, []);
+  // Load products from DB (fallback to local seed if DB fails)
+  useEffect(() => {
+    (async () => {
+      try {
+        const dbProducts = await fetchProductsFromDB();
+        setProducts(dbProducts);
+      } catch (e) {
+        console.error("Failed to load products from DB:", e);
+        setProducts(loadProducts());
+      }
+    })();
+  }, []);
 
+  // Persist cart
   useEffect(() => {
     saveOrderItems(orderItems);
   }, [orderItems]);
 
-  
-
-  const onSeeOrders = () => setCurrentView("seeOrders");
-  const onBackFromOrders = () => setCurrentView("catalog");
-
+  // Remove any cart items that no longer exist in products
   const productIds = useMemo(() => new Set(products.map((p) => p.id)), [products]);
 
   useEffect(() => {
@@ -74,7 +71,6 @@ useEffect(() => {
           onOrderItemsChange={setOrderItems}
           onProceedToOrder={handleProceedToOrder}
           onOpenAdmin={() => setCurrentView("adminPin")}
-          
         />
       )}
 
@@ -98,15 +94,7 @@ useEffect(() => {
       )}
 
       {currentView === "admin" && (
-        <AdminProducts
-          products={products}
-          onChangeProducts={setProducts}
-          onClose={() => setCurrentView("catalog")}
-          onSeeOrders={onSeeOrders}
-        />
-      )}
-      {currentView === "seeOrders" && (
-        <SeeOldOrders onBack={onBackFromOrders} />
+        <AdminCustomerOrders onClose={() => setCurrentView("catalog")} />
       )}
     </>
   );

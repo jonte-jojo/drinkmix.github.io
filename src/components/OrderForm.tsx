@@ -104,21 +104,21 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
     try {
       // ✅ 1) SAVE CUSTOMER
       const { data: customerData, error: customerError } = await supabase
-        .from("customers")
-        .upsert([
-          {
-            company_name: customer.companyName,
-            contact_person: customer.contactPerson,
-            email: customer.email,
-            phone: customer.phone,
-            address: customer.address,
-          },
-        ],{onConflict: "email" }
-        )
-        .select()
-        .single();
-  
-      if (customerError) throw customerError;
+  .from("customers")
+  .upsert(
+    [{
+      company_name: customer.companyName,
+      contact_person: customer.contactPerson,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+    }],
+    { onConflict: "email" }
+  )
+  .select()
+  .single();
+
+if (customerError) throw customerError;
   
       
       // ✅ 2) SAVE ORDER

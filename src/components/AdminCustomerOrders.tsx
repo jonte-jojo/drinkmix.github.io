@@ -29,7 +29,7 @@ type OrderRow = {
 
 type OrderItemRow = {
   id?: string;
-  order_id: number;
+  order_id: string;
   product_id: string | null;
   product_name: string | null;
   quantity: number | null;

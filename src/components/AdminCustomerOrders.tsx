@@ -252,8 +252,8 @@ useEffect(() => {
     onValueChange={(val) => setSelectedOrderId(Number(val))}
     className="w-full"
   >
-    <TabsList className="flex flex-wrap gap-2 bg-transparent p-0">
-      {orders.map((o, idx) => (
+<TabsList className="flex w-full gap-2 bg-transparent p-0 overflow-x-auto whitespace-nowrap no-scrollbar">
+          {orders.map((o, idx) => (
         <TabsTrigger
           key={o.id}
           value={String(o.id)}

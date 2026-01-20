@@ -16,7 +16,7 @@ type CustomerRow = {
 };
 
 type OrderRow = {
-  id: number;
+  id: string;
   customer_id: number;
   order_number: string | null;
   order_date: string | null;
@@ -28,7 +28,7 @@ type OrderRow = {
 };
 
 type OrderItemRow = {
-  id?: number;
+  id?: string;
   order_id: number;
   product_id: string | null;
   product_name: string | null;
@@ -45,6 +45,15 @@ function formatSEK(n?: number | null) {
   if (typeof n !== "number") return "-";
   return `${n} kr`;
 }
+function formatOrderDate(o: OrderRow) {
+    const raw = o.order_date || o.created_at;
+    if (!raw) return "Okänt datum";
+  
+    const d = new Date(raw);
+    if (Number.isNaN(d.getTime())) return raw; // if it's already a formatted string
+  
+    return d.toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" });
+  }
 
 export function AdminCustomerOrders({
   onClose,
@@ -55,7 +64,7 @@ export function AdminCustomerOrders({
   const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
-  const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   const [orderItems, setOrderItems] = useState<OrderItemRow[]>([]);
   const [loadingCustomers, setLoadingCustomers] = useState(false);
@@ -249,7 +258,7 @@ useEffect(() => {
 ) : (
   <Tabs
     value={String(selectedOrderId ?? orders[0].id)}
-    onValueChange={(val) => setSelectedOrderId(Number(val))}
+    onValueChange={(val) => setSelectedOrderId((val))}
     className="w-full"
   >
 <TabsList className="flex w-full gap-2 bg-transparent p-0 overflow-x-auto whitespace-nowrap no-scrollbar">
@@ -259,7 +268,7 @@ useEffect(() => {
           value={String(o.id)}
           className="rounded-full px-4 py-2 border bg-emerald-100 text-emerald-900 data-[state=active]:bg-emerald-500 data-[state=active]:text-white"
         >
-          {o.order_number || `Order ${idx + 1}`}
+          {formatOrderDate(o)}
         </TabsTrigger>
       ))}
     </TabsList>

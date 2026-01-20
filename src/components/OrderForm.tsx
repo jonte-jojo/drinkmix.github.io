@@ -105,7 +105,7 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
       // ✅ 1) SAVE CUSTOMER
       const { data: customerData, error: customerError } = await supabase
         .from("customers")
-        .insert([
+        .upsert([
           {
             company_name: customer.companyName,
             contact_person: customer.contactPerson,
@@ -113,7 +113,8 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
             phone: customer.phone,
             address: customer.address,
           },
-        ])
+        ],{onConflict: "email" }
+        )
         .select()
         .single();
   

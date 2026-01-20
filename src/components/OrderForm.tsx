@@ -442,6 +442,9 @@ if (customerError) throw customerError;
                     <span className="text-3xl font-bold text-secondary">{totalPrice} kr</span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">excl. VAT</p>
+                  <div className='text-center mt-1'>
+                  <span className='text-sm text-muted-foreground' >(Fakturering sker via Prioritet Finans)</span>
+                </div>
                 </div>
               </CardContent>
             </Card>

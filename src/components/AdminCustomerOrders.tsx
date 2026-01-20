@@ -265,122 +265,121 @@ useEffect(() => {
     </TabsList>
 
     {orders.map((o) => (
-      <TabsContent key={o.id} value={String(o.id)} className="mt-6">
-        {<TabsContent key={o.id} value={String(o.id)} className="mt-6">
-  {/* IMPORTANT: use "o" here, not selectedOrder */}
-  <div className="space-y-6">
-    {/* Customer info */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Customer Information</CardTitle>
-      </CardHeader>
-      <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
-        <div><span className="text-muted-foreground">Company:</span> {selectedCustomer?.company_name ?? "-"}</div>
-        <div><span className="text-muted-foreground">Contact:</span> {selectedCustomer?.contact_person ?? "-"}</div>
-        <div><span className="text-muted-foreground">Email:</span> {selectedCustomer?.email ?? "-"}</div>
-        <div><span className="text-muted-foreground">Phone:</span> {selectedCustomer?.phone ?? "-"}</div>
-        <div className="sm:col-span-2"><span className="text-muted-foreground">Address:</span> {selectedCustomer?.address ?? "-"}</div>
-      </CardContent>
-    </Card>
+  <TabsContent key={o.id} value={String(o.id)} className="mt-6">
+    <div className="space-y-6">
+      {/* Customer info */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Customer Information</CardTitle>
+        </CardHeader>
+        <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
+          <div><span className="text-muted-foreground">Company:</span> {selectedCustomer?.company_name ?? "-"}</div>
+          <div><span className="text-muted-foreground">Contact:</span> {selectedCustomer?.contact_person ?? "-"}</div>
+          <div><span className="text-muted-foreground">Email:</span> {selectedCustomer?.email ?? "-"}</div>
+          <div><span className="text-muted-foreground">Phone:</span> {selectedCustomer?.phone ?? "-"}</div>
+          <div className="sm:col-span-2"><span className="text-muted-foreground">Address:</span> {selectedCustomer?.address ?? "-"}</div>
+        </CardContent>
+      </Card>
 
-    {/* Order meta */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Order Details</CardTitle>
-      </CardHeader>
-      <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
-        <div><span className="text-muted-foreground">Order ID:</span> {o.id}</div>
-        <div><span className="text-muted-foreground">Order number:</span> {o.order_number ?? "-"}</div>
-        <div><span className="text-muted-foreground">Order date:</span> {o.order_date ?? "-"}</div>
-        <div><span className="text-muted-foreground">Total:</span> {formatSEK(o.total_price)}</div>
-        <div className="sm:col-span-2"><span className="text-muted-foreground">Notes:</span> {o.notes ?? "-"}</div>
+      {/* Order meta */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Order Details</CardTitle>
+        </CardHeader>
+        <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
+          <div><span className="text-muted-foreground">Order ID:</span> {o.id}</div>
+          <div><span className="text-muted-foreground">Order number:</span> {o.order_number ?? "-"}</div>
+          <div><span className="text-muted-foreground">Order date:</span> {o.order_date ?? "-"}</div>
+          <div><span className="text-muted-foreground">Total:</span> {formatSEK(o.total_price)}</div>
+          <div className="sm:col-span-2"><span className="text-muted-foreground">Notes:</span> {o.notes ?? "-"}</div>
 
-        {/* Permit */}
-        <div className="sm:col-span-2">
-          <div className="flex items-center gap-2 text-muted-foreground mb-2">
-            <FileText className="w-4 h-4" />
-            Alkoholtillstånd
-          </div>
+          {/* Permit */}
+          <div className="sm:col-span-2">
+            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+              <FileText className="w-4 h-4" />
+              Alkoholtillstånd
+            </div>
 
-          {!o.permit_url ? (
-            <div className="text-muted-foreground text-sm">Ingen fil uppladdad.</div>
-          ) : (
-            <div className="space-y-3">
-              <div className="flex flex-wrap gap-3">
-                <a href={o.permit_url} target="_blank" rel="noreferrer" className="text-sm underline">Öppna fil</a>
-                <a href={o.permit_url} download className="text-sm underline">Ladda ner</a>
-              </div>
-
-              {isLikelyImageUrl(o.permit_url) && (
-                <img src={o.permit_url} alt="Alkoholtillstånd" className="max-h-80 w-full rounded-md border bg-white object-contain" />
-              )}
-
-              {isPdfUrl(o.permit_url) && (
-                <iframe title="Alkoholtillstånd (PDF)" src={o.permit_url} className="w-full h-[520px] rounded-md border bg-white" />
-              )}
-
-              {!isLikelyImageUrl(o.permit_url) && !isPdfUrl(o.permit_url) && (
-                <div className="text-muted-foreground text-sm">
-                  Förhandsvisning stöds inte för denna filtyp. Använd “Öppna fil”.
+            {!o.permit_url ? (
+              <div className="text-muted-foreground text-sm">Ingen fil uppladdad.</div>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-3">
+                  <a href={o.permit_url} target="_blank" rel="noreferrer" className="text-sm underline">Öppna fil</a>
+                  <a href={o.permit_url} download className="text-sm underline">Ladda ner</a>
                 </div>
-              )}
-            </div>
-          )}
-        </div>
 
-        {/* Signature */}
-        <div className="sm:col-span-2">
-          <div className="text-muted-foreground mb-2">Signature</div>
-          {!o.signature ? (
-            <div className="text-muted-foreground text-sm">Ingen signatur sparad.</div>
-          ) : (
-            <img src={o.signature} alt="Signature" className="max-h-56 rounded-md border bg-white object-contain" />
-          )}
-        </div>
-      </CardContent>
-    </Card>
+                {isLikelyImageUrl(o.permit_url) && (
+                  <img
+                    src={o.permit_url}
+                    alt="Alkoholtillstånd"
+                    className="max-h-80 w-full rounded-md border bg-white object-contain"
+                  />
+                )}
 
-    {/* Items (still uses orderItems state for selectedOrderId) */}
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">Items</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {loadingOrderItems && <div className="text-muted-foreground">Laddar items...</div>}
-        {!loadingOrderItems && orderItems.length === 0 && (
-          <div className="text-muted-foreground">Inga items hittades för denna order.</div>
-        )}
+                {isPdfUrl(o.permit_url) && (
+                  <iframe
+                    title="Alkoholtillstånd (PDF)"
+                    src={o.permit_url}
+                    className="w-full h-[520px] rounded-md border bg-white"
+                  />
+                )}
 
-        {orderItems.map((it, i) => (
-          <div
-            key={`${it.order_id}-${it.product_id ?? i}`}
-            className="flex items-center justify-between border-b border-border pb-2 last:border-0"
-          >
-            <div>
-              <div className="font-medium">{it.product_name ?? "(okänd produkt)"}</div>
-              <div className="text-xs text-muted-foreground">
-                {it.quantity ?? 0} flak • {formatSEK(it.price_per_case)} / flak
+                {!isLikelyImageUrl(o.permit_url) && !isPdfUrl(o.permit_url) && (
+                  <div className="text-muted-foreground text-sm">
+                    Förhandsvisning stöds inte för denna filtyp. Använd “Öppna fil”.
+                  </div>
+                )}
               </div>
+            )}
+          </div>
+
+          {/* Signature */}
+          <div className="sm:col-span-2">
+            <div className="text-muted-foreground mb-2">Signature</div>
+            {!o.signature ? (
+              <div className="text-muted-foreground text-sm">Ingen signatur sparad.</div>
+            ) : (
+              <img
+                src={o.signature}
+                alt="Signature"
+                className="max-h-56 rounded-md border bg-white object-contain"
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Items (NOTE: this shows items for selectedOrderId, which matches the selected tab) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Items</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {loadingOrderItems && <div className="text-muted-foreground">Laddar items...</div>}
+          {!loadingOrderItems && orderItems.length === 0 && (
+            <div className="text-muted-foreground">Inga items hittades för denna order.</div>
+          )}
+
+          {orderItems.map((it, i) => (
+            <div
+              key={`${it.order_id}-${it.product_id ?? i}`}
+              className="flex items-center justify-between border-b border-border pb-2 last:border-0"
+            >
+              <div>
+                <div className="font-medium">{it.product_name ?? "(okänd produkt)"}</div>
+                <div className="text-xs text-muted-foreground">
+                  {it.quantity ?? 0} flak • {formatSEK(it.price_per_case)} / flak
+                </div>
+              </div>
+              <div className="font-semibold">{formatSEK(it.case_price)}</div>
             </div>
-            <div className="font-semibold">{formatSEK(it.case_price)}</div>
-          </div>
-        ))}
-      </CardContent>
-    </Card>
-  </div>
-</TabsContent>}
-        {!selectedOrder ? (
-          <div className="text-muted-foreground">Välj en order för att se detaljer.</div>
-        ) : (
-          <div className="space-y-6">
-            {/* keep ALL your cards below exactly as they are */}
-            {/* Customer Information card */}
-            {/* Order Details card */}
-            {/* Items card */}
-          </div>
-        )}
-      </TabsContent>
-    ))}
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  </TabsContent>
+))}
   </Tabs>
 )}
           </CardContent>

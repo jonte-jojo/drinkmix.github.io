@@ -194,8 +194,8 @@ ${I}`}class ze extends Error{constructor({message:t,code:s,cause:o,name:l}){var 
     contact_person,
     email,
     phone,
-    address,
-    orders!inner(id)
+    address
+    
   `).order("company_name",{ascending:!0});if(M)throw M;const J=E??[],U=new Map;for(const ee of J){const ae=(ee.company_name??"").trim(),we=ae.toLowerCase();if(!we)continue;const Ue=U.get(we);Ue?(Ue.customerIds.includes(ee.id)||Ue.customerIds.push(ee.id),!Ue.company_name&&ae&&(Ue.company_name=ae)):U.set(we,{key:we,company_name:ae,customerIds:[ee.id],contact_person:ee.contact_person,email:ee.email,phone:ee.phone,address:ee.address})}const V=Array.from(U.values()).sort((ee,ae)=>ee.company_name.localeCompare(ae.company_name,"sv"));s(V),V.length&&o==null&&l(V[0].key)}finally{w(!1)}})()},[]),j.useEffect(()=>{I&&(async()=>{T(!0),d([]),p(null),y([]);try{const{data:E,error:M}=await Qt.from("orders").select(`
     id, customer_id, order_number, order_date, notes, total_price,
     signature, permit_url, created_at,

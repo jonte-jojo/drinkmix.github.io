@@ -29,7 +29,7 @@ type OrderRow = {
 
 type OrderItemRow = {
   id?: string;
-  order_id: string;
+  order_id: number;
   product_id: string | null;
   product_name: string | null;
   quantity: number | null;
@@ -198,7 +198,7 @@ export function AdminCustomerOrders({
         const { data, error } = await supabase
           .from("order_items")
           .select("order_id, product_id, product_name, quantity, price_per_case, case_price")
-          .eq("order_id", selectedOrderId)
+          .eq("order_id", Number(selectedOrderId))
           .order("product_name", { ascending: true });
 
         if (error) throw error;

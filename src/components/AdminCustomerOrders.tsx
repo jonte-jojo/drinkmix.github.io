@@ -111,14 +111,14 @@ export function AdminCustomerOrders({
     contact_person,
     email,
     phone,
-    address,
-    orders!inner(id)
+    address
+    
   `)
   .order("company_name", { ascending: true });
   
         if (error) throw error;
   
-        const rows = (data ?? []) as (CustomerRow & { orders?: { id: number }[] })[];
+        const rows = (data ?? []) as CustomerRow[];
   
         // ✅ group by normalized company_name
         const map = new Map<string, CustomerGroup>();

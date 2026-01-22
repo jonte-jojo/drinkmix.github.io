@@ -126,3 +126,17 @@ export async function deleteProductFromDB(productId: string): Promise<void> {
   const { error } = await supabase.from("products").delete().eq("id", id);
   if (error) throw error;
 }
+
+export async function fetchProductByIdFromDB(id: string): Promise<Product | null> {
+    const numericId = Number(id);
+    if (!Number.isFinite(numericId)) return null;
+  
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("id", numericId)
+      .single();
+  
+    if (error) return null;
+    return dbToProduct(data as ProductRow);
+  }

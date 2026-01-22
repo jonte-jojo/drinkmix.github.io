@@ -33,7 +33,9 @@ export const ProductCatalog = ({
   };
 
   const filteredProducts = activeCategory === 'all' ? products.filter((p) => p.showInAll !== false) : products.filter((p) => p.category === activeCategory);
-
+  const productImages = products
+  .filter((p) => p.image) // only products that have an image
+  ;
   const totalItems = Object.values(orderItems).reduce((sum, qty) => sum + qty, 0);
   const totalPrice = Object.entries(orderItems).reduce((sum, [productId, qty]) => {
     const product = products.find((p) => p.id === productId);
@@ -89,24 +91,24 @@ export const ProductCatalog = ({
           </TabsList>
 
           <TabsContent value={activeCategory} className="mt-0">
-  {activeCategory === 'Produktbilder' ? (
-    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {/* {bilder.map((item) => (
-        <ProductImageCard key={item.id} item={item} />
-      ))} */}
-    </div>
-  ) : (
-    <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {filteredProducts.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          quantity={orderItems[product.id] || 0}
-          onQuantityChange={handleQuantityChange}
-        />
-      ))}
-    </div>
-  )}
+          {activeCategory === "Produktbilder" ? (
+  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {productImages.map((item) => (
+      <ProductImageCard key={item.id} item={item} />
+    ))}
+  </div>
+) : (
+  <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    {filteredProducts.map((product) => (
+      <ProductCard
+        key={product.id}
+        product={product}
+        quantity={orderItems[product.id] || 0}
+        onQuantityChange={handleQuantityChange}
+      />
+    ))}
+  </div>
+)}
 </TabsContent>
         </Tabs>
       </div>

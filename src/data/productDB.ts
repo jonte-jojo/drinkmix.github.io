@@ -61,7 +61,7 @@ export function productToDb(product: Product): Omit<ProductRow, "id"> & Partial<
     unit: product.unit,
     category: product.category,
     image: product.image,
-    has_alcohol: !!product.hasAlcohol,
+    hasAlcohol: !!product.hasAlcohol,
     alcoholPercent: product.alcoholPercent ?? null,
   };
 

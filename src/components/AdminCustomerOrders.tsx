@@ -7,7 +7,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type CustomerRow = {
-  id: string;
+  id: string; // uuid
   company_name: string | null;
   contact_person: string | null;
   email: string | null;
@@ -16,8 +16,8 @@ type CustomerRow = {
 };
 
 type OrderRow = {
-  id: string;
-  customer_id: string;
+  id: string; // uuid
+  customer_id: string; // uuid
   order_number: string | null;
   order_date: string | null;
   notes: string | null;
@@ -25,17 +25,11 @@ type OrderRow = {
   signature: string | null;
   permit_url: string | null;
   created_at?: string | null;
-
-  company_name: string | null;
-  contact_person: string | null;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
 };
 
 type OrderItemRow = {
-  id?: string;
-  order_id: string;
+  id?: string; // uuid
+  order_id: string; // uuid
   product_id: string | null;
   product_name: string | null;
   quantity: number | null;
@@ -44,91 +38,97 @@ type OrderItemRow = {
 };
 
 type CustomerGroup = {
-    key: string;                 // normalized company name
-    company_name: string;        // display name
-    customerIds: string[];       // ALL customer ids with same company_name
-    contact_person?: string | null;
-    email?: string | null;
-    phone?: string | null;
-    address?: string | null;
+  key: string; // normalized company name
+  company_name: string; // display name
+  customerIds: string[]; // all customers that share the company_name
+  contact_person?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+};
+
+type OrderWithCustomer = OrderRow & {
+    customers: {
+      company_name: string | null;
+      contact_person: string | null;
+      email: string | null;
+      phone: string | null;
+      address: string | null;
+    }[];
   };
 
 function isLikelyImageUrl(url: string) {
   return /\.(png|jpe?g|webp|gif|bmp)$/i.test(url.split("?")[0]);
 }
 
+function isPdfUrl(url: string) {
+  return /\.pdf$/i.test(url.split("?")[0]);
+}
+
 function formatSEK(n?: number | null) {
   if (typeof n !== "number") return "-";
   return `${n} kr`;
 }
-function formatOrderDate(o: OrderRow) {
-    const raw = o.order_date || o.created_at;
-    if (!raw) return "Okänt datum";
-  
-    const d = new Date(raw);
-    if (Number.isNaN(d.getTime())) return raw; // if it's already a formatted string
-  
-    return d.toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" });
-  }
 
-export function AdminCustomerOrders({
-  onClose,
-}: {
-  onClose: () => void;
-}) {
-    const [companies, setCompanies] = useState<CustomerGroup[]>([]);
-    const [selectedCompanyKey, setSelectedCompanyKey] = useState<string | null>(null);
+function formatOrderDate(o: { order_date: string | null; created_at?: string | null }) {
+  const raw = o.order_date || o.created_at;
+  if (!raw) return "Okänt datum";
 
-  const [orders, setOrders] = useState<OrderRow[]>([]);
+  const d = new Date(raw);
+  if (Number.isNaN(d.getTime())) return raw;
+
+  return d.toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" });
+}
+
+export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
+  const [companies, setCompanies] = useState<CustomerGroup[]>([]);
+  const [selectedCompanyKey, setSelectedCompanyKey] = useState<string | null>(null);
+
+  const [orders, setOrders] = useState<OrderWithCustomer[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 
   const [orderItems, setOrderItems] = useState<OrderItemRow[]>([]);
+
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [loadingOrderItems, setLoadingOrderItems] = useState(false);
 
   const selectedCompany = useMemo(
-  () => companies.find((c) => c.key === selectedCompanyKey) ?? null,
-  [companies, selectedCompanyKey]
-);
-
-  const selectedOrder = useMemo(
-    () => orders.find((o) => o.id === selectedOrderId) ?? null,
-    [orders, selectedOrderId]
+    () => companies.find((c) => c.key === selectedCompanyKey) ?? null,
+    [companies, selectedCompanyKey]
   );
 
-  // 1) Load customers
-  // 1) Load customers (ONLY customers that have at least 1 order)
+  // 1) Load customers and group by company_name
   useEffect(() => {
     (async () => {
       setLoadingCustomers(true);
       try {
+        // If you only want customers that have at least 1 order, use orders!inner(id) below.
         const { data, error } = await supabase
-  .from("customers")
-  .select(`
-    id,
-    company_name,
-    contact_person,
-    email,
-    phone,
-    address
-    
-  `)
-  .order("company_name", { ascending: true });
-  
+          .from("customers")
+          .select(`
+            id,
+            company_name,
+            contact_person,
+            email,
+            phone,
+            address,
+            orders!inner(id)
+          `)
+          .order("company_name", { ascending: true });
+
         if (error) throw error;
-  
-        const rows = (data ?? []) as CustomerRow[];
-  
-        // ✅ group by normalized company_name
+
+        const rows = (data ?? []) as (CustomerRow & { orders?: { id: string }[] })[];
+
         const map = new Map<string, CustomerGroup>();
-  
+
         for (const r of rows) {
           const display = (r.company_name ?? "").trim();
-          const key = display.toLowerCase(); // normalize
-  
-          if (!key) continue; // skip totally empty names
-  
+          const key = display.toLowerCase();
+
+          if (!key) continue;
+
           const existing = map.get(key);
           if (!existing) {
             map.set(key, {
@@ -141,20 +141,17 @@ export function AdminCustomerOrders({
               address: r.address,
             });
           } else {
-            // add customer id to same shop
             if (!existing.customerIds.includes(r.id)) existing.customerIds.push(r.id);
-  
-            // keep “best” display name if needed
             if (!existing.company_name && display) existing.company_name = display;
           }
         }
-  
+
         const grouped = Array.from(map.values()).sort((a, b) =>
           a.company_name.localeCompare(b.company_name, "sv")
         );
-  
+
         setCompanies(grouped);
-  
+
         if (grouped.length && selectedCompanyKey == null) {
           setSelectedCompanyKey(grouped[0].key);
         }
@@ -164,32 +161,46 @@ export function AdminCustomerOrders({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  // 2) Load orders for selected customer
+
+  // 2) Load orders for selected company (all customer ids in that company group)
   useEffect(() => {
     if (!selectedCompany) return;
-  
+
     (async () => {
       setLoadingOrders(true);
       setOrders([]);
       setSelectedOrderId(null);
       setOrderItems([]);
-  
+
       try {
         const { data, error } = await supabase
-  .from("orders")
-  .select(`
-    id, customer_id, order_number, order_date, notes, total_price,
-    signature, permit_url, created_at,
-    company_name, contact_person, email, phone, address
-  `)
-  .in("customer_id", selectedCompany.customerIds) // ✅ string[]
-  .order("created_at", { ascending: false });
-  
+          .from("orders")
+          .select(`
+            id,
+            customer_id,
+            order_number,
+            order_date,
+            notes,
+            total_price,
+            signature,
+            permit_url,
+            created_at,
+            customers:customer_id (
+              company_name,
+              contact_person,
+              email,
+              phone,
+              address
+            )
+          `)
+          .in("customer_id", selectedCompany.customerIds)
+          .order("created_at", { ascending: false });
+
         if (error) throw error;
-  
-        const rows = (data ?? []) as OrderRow[];
+
+        const rows = (data ?? []) as OrderWithCustomer[];
         setOrders(rows);
-  
+
         if (rows.length) setSelectedOrderId(rows[0].id);
       } finally {
         setLoadingOrders(false);
@@ -207,7 +218,7 @@ export function AdminCustomerOrders({
       try {
         const { data, error } = await supabase
           .from("order_items")
-          .select("order_id, product_id, product_name, quantity, price_per_case, case_price")
+          .select("id, order_id, product_id, product_name, quantity, price_per_case, case_price")
           .eq("order_id", selectedOrderId)
           .order("product_name", { ascending: true });
 
@@ -219,10 +230,6 @@ export function AdminCustomerOrders({
       }
     })();
   }, [selectedOrderId]);
-
-  function isPdfUrl(url: string) {
-    return /\.pdf$/i.test(url.split("?")[0]);
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -242,7 +249,7 @@ export function AdminCustomerOrders({
       </header>
 
       <div className="container mx-auto px-6 py-8 grid lg:grid-cols-3 gap-6">
-        {/* LEFT: Customers */}
+        {/* LEFT: Companies */}
         <Card className="lg:col-span-1">
           <CardHeader>
             <CardTitle className="font-heading text-xl">Kunder</CardTitle>
@@ -255,25 +262,24 @@ export function AdminCustomerOrders({
               <div className="text-muted-foreground">Inga kunder hittades än.</div>
             )}
 
-{companies.map((c) => {
-  const active = c.key === selectedCompanyKey;
-  const title = c.company_name || "(Namnlös kund)";
-  const sub = [c.contact_person, c.email].filter(Boolean).join(" • ");
+            {companies.map((c) => {
+              const active = c.key === selectedCompanyKey;
+              const title = c.company_name || "(Namnlös kund)";
+              const sub = [c.contact_person, c.email].filter(Boolean).join(" • ");
 
-  return (
-    <button
-      key={c.key}
-      onClick={() => setSelectedCompanyKey(c.key)}
-      className={`w-full text-left p-3 rounded-lg border transition ${
-        active ? "border-primary bg-muted" : "border-border hover:bg-muted/50"
-      }`}
-    >
-      <div className="font-medium text-foreground">{title}</div>
-      <div className="text-xs text-muted-foreground">{sub || "—"}</div>
-    </button>
-  );
-})}
-                  
+              return (
+                <button
+                  key={c.key}
+                  onClick={() => setSelectedCompanyKey(c.key)}
+                  className={`w-full text-left p-3 rounded-lg border transition ${
+                    active ? "border-primary bg-muted" : "border-border hover:bg-muted/50"
+                  }`}
+                >
+                  <div className="font-medium text-foreground">{title}</div>
+                  <div className="text-xs text-muted-foreground">{sub || "—"}</div>
+                </button>
+              );
+            })}
           </CardContent>
         </Card>
 
@@ -281,152 +287,193 @@ export function AdminCustomerOrders({
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="font-heading text-xl">
-            {selectedCompany ? (selectedCompany.company_name ?? "Kund") : "Välj en kund"}
-           </CardTitle>
+              {selectedCompany ? selectedCompany.company_name : "Välj en kund"}
+            </CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Orders tabs */}
             {loadingOrders ? (
-  <div className="text-muted-foreground">Laddar ordrar...</div>
-) : orders.length === 0 ? (
-  <div className="text-muted-foreground">Den här kunden har inga ordrar.</div>
-) : (
-  <Tabs
-    value={String(selectedOrderId ?? orders[0].id)}
-    onValueChange={(val) => setSelectedOrderId((val))}
-    className="w-full"
-  >
-<TabsList className="flex w-full gap-2 bg-transparent p-0 overflow-x-auto whitespace-nowrap no-scrollbar">
-          {orders.map((o, idx) => (
-        <TabsTrigger
-          key={o.id}
-          value={String(o.id)}
-          className="rounded-full px-4 py-2 border bg-emerald-100 text-emerald-900 data-[state=active]:bg-emerald-500 data-[state=active]:text-white"
-        >
-          {formatOrderDate(o)}
-        </TabsTrigger>
-      ))}
-    </TabsList>
-
-    {orders.map((o) => (
-  <TabsContent key={o.id} value={String(o.id)} className="mt-6">
-    <div className="space-y-6">
-      {/* Customer info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Customer Information</CardTitle>
-        </CardHeader>
-        <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
-          <div><span className="text-muted-foreground">Company:</span> {o.company_name ?? "-"}</div>
-          <div><span className="text-muted-foreground">Contact:</span> {o.contact_person ?? "-"}</div>
-          <div><span className="text-muted-foreground">Email:</span> {o.email ?? "-"}</div>
-          <div><span className="text-muted-foreground">Phone:</span> {o.phone ?? "-"}</div>
-          <div className="sm:col-span-2"><span className="text-muted-foreground">Address:</span> {o.address ?? "-"}</div>
-        </CardContent>
-      </Card>
-
-      {/* Order meta */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Order Details</CardTitle>
-        </CardHeader>
-        <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
-          <div><span className="text-muted-foreground">Order ID:</span> {o.id}</div>
-          <div><span className="text-muted-foreground">Order number:</span> {o.order_number ?? "-"}</div>
-          <div><span className="text-muted-foreground">Order date:</span> {o.order_date ?? "-"}</div>
-          <div><span className="text-muted-foreground">Total:</span> {formatSEK(o.total_price)}</div>
-          <div className="sm:col-span-2"><span className="text-muted-foreground">Notes:</span> {o.notes ?? "-"}</div>
-
-          {/* Permit */}
-          <div className="sm:col-span-2">
-            <div className="flex items-center gap-2 text-muted-foreground mb-2">
-              <FileText className="w-4 h-4" />
-              Alkoholtillstånd
-            </div>
-
-            {!o.permit_url ? (
-              <div className="text-muted-foreground text-sm">Ingen fil uppladdad.</div>
+              <div className="text-muted-foreground">Laddar ordrar...</div>
+            ) : orders.length === 0 ? (
+              <div className="text-muted-foreground">Den här kunden har inga ordrar.</div>
             ) : (
-              <div className="space-y-3">
-                <div className="flex flex-wrap gap-3">
-                  <a href={o.permit_url} target="_blank" rel="noreferrer" className="text-sm underline">Öppna fil</a>
-                  <a href={o.permit_url} download className="text-sm underline">Ladda ner</a>
-                </div>
+              <Tabs
+                value={String(selectedOrderId ?? orders[0].id)}
+                onValueChange={(val) => setSelectedOrderId(val)}
+                className="w-full"
+              >
+                <TabsList className="flex w-full gap-2 bg-transparent p-0 overflow-x-auto whitespace-nowrap no-scrollbar">
+                  {orders.map((o) => (
+                    <TabsTrigger
+                      key={o.id}
+                      value={String(o.id)}
+                      className="rounded-full px-4 py-2 border bg-emerald-100 text-emerald-900 data-[state=active]:bg-emerald-500 data-[state=active]:text-white"
+                    >
+                      {formatOrderDate(o)}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
 
-                {isLikelyImageUrl(o.permit_url) && (
-                  <img
-                    src={o.permit_url}
-                    alt="Alkoholtillstånd"
-                    className="max-h-80 w-full rounded-md border bg-white object-contain"
-                  />
-                )}
+                {orders.map((o) => (
+                  <TabsContent key={o.id} value={String(o.id)} className="mt-6">
+                    <div className="space-y-6">
+                      {/* Customer info */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Customer Information</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Company:</span>{" "}
+                            {o.customers?.[0].company_name ?? "-"}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Contact:</span>{" "}
+                            {o.customers?.[0].contact_person ?? "-"}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Email:</span>{" "}
+                            {o.customers?.[0].email ?? "-"}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Phone:</span>{" "}
+                            {o.customers?.[0].phone ?? "-"}
+                          </div>
+                          <div className="sm:col-span-2">
+                            <span className="text-muted-foreground">Address:</span>{" "}
+                            {o.customers?.[0].address ?? "-"}
+                          </div>
+                        </CardContent>
+                      </Card>
 
-                {isPdfUrl(o.permit_url) && (
-                  <iframe
-                    title="Alkoholtillstånd (PDF)"
-                    src={o.permit_url}
-                    className="w-full h-[520px] rounded-md border bg-white"
-                  />
-                )}
+                      {/* Order meta */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Order Details</CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Order ID:</span> {o.id}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Order number:</span>{" "}
+                            {o.order_number ?? "-"}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Order date:</span>{" "}
+                            {o.order_date ?? "-"}
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Total:</span>{" "}
+                            {formatSEK(o.total_price)}
+                          </div>
+                          <div className="sm:col-span-2">
+                            <span className="text-muted-foreground">Notes:</span> {o.notes ?? "-"}
+                          </div>
 
-                {!isLikelyImageUrl(o.permit_url) && !isPdfUrl(o.permit_url) && (
-                  <div className="text-muted-foreground text-sm">
-                    Förhandsvisning stöds inte för denna filtyp. Använd “Öppna fil”.
-                  </div>
-                )}
-              </div>
+                          {/* Permit */}
+                          <div className="sm:col-span-2">
+                            <div className="flex items-center gap-2 text-muted-foreground mb-2">
+                              <FileText className="w-4 h-4" />
+                              Alkoholtillstånd
+                            </div>
+
+                            {!o.permit_url ? (
+                              <div className="text-muted-foreground text-sm">Ingen fil uppladdad.</div>
+                            ) : (
+                              <div className="space-y-3">
+                                <div className="flex flex-wrap gap-3">
+                                  <a
+                                    href={o.permit_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-sm underline"
+                                  >
+                                    Öppna fil
+                                  </a>
+                                  <a href={o.permit_url} download className="text-sm underline">
+                                    Ladda ner
+                                  </a>
+                                </div>
+
+                                {isLikelyImageUrl(o.permit_url) && (
+                                  <img
+                                    src={o.permit_url}
+                                    alt="Alkoholtillstånd"
+                                    className="max-h-80 w-full rounded-md border bg-white object-contain"
+                                  />
+                                )}
+
+                                {isPdfUrl(o.permit_url) && (
+                                  <iframe
+                                    title="Alkoholtillstånd (PDF)"
+                                    src={o.permit_url}
+                                    className="w-full h-[520px] rounded-md border bg-white"
+                                  />
+                                )}
+
+                                {!isLikelyImageUrl(o.permit_url) && !isPdfUrl(o.permit_url) && (
+                                  <div className="text-muted-foreground text-sm">
+                                    Förhandsvisning stöds inte för denna filtyp. Använd “Öppna fil”.
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Signature */}
+                          <div className="sm:col-span-2">
+                            <div className="text-muted-foreground mb-2">Signature</div>
+                            {!o.signature ? (
+                              <div className="text-muted-foreground text-sm">Ingen signatur sparad.</div>
+                            ) : (
+                              <img
+                                src={o.signature}
+                                alt="Signature"
+                                className="max-h-56 rounded-md border bg-white object-contain"
+                              />
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      {/* Items */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-base">Items</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-3">
+                          {loadingOrderItems && (
+                            <div className="text-muted-foreground">Laddar items...</div>
+                          )}
+
+                          {!loadingOrderItems && orderItems.length === 0 && (
+                            <div className="text-muted-foreground">
+                              Inga items hittades för denna order.
+                            </div>
+                          )}
+
+                          {orderItems.map((it, i) => (
+                            <div
+                              key={it.id ?? `${it.order_id}-${it.product_id ?? i}`}
+                              className="flex items-center justify-between border-b border-border pb-2 last:border-0"
+                            >
+                              <div>
+                                <div className="font-medium">{it.product_name ?? "(okänd produkt)"}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  {it.quantity ?? 0} flak • {formatSEK(it.price_per_case)} / flak
+                                </div>
+                              </div>
+                              <div className="font-semibold">{formatSEK(it.case_price)}</div>
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+                ))}
+              </Tabs>
             )}
-          </div>
-
-          {/* Signature */}
-          <div className="sm:col-span-2">
-            <div className="text-muted-foreground mb-2">Signature</div>
-            {!o.signature ? (
-              <div className="text-muted-foreground text-sm">Ingen signatur sparad.</div>
-            ) : (
-              <img
-                src={o.signature}
-                alt="Signature"
-                className="max-h-56 rounded-md border bg-white object-contain"
-              />
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Items (NOTE: this shows items for selectedOrderId, which matches the selected tab) */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Items</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {loadingOrderItems && <div className="text-muted-foreground">Laddar items...</div>}
-          {!loadingOrderItems && orderItems.length === 0 && (
-            <div className="text-muted-foreground">Inga items hittades för denna order.</div>
-          )}
-
-          {orderItems.map((it, i) => (
-            <div
-              key={`${it.order_id}-${it.product_id ?? i}`}
-              className="flex items-center justify-between border-b border-border pb-2 last:border-0"
-            >
-              <div>
-                <div className="font-medium">{it.product_name ?? "(okänd produkt)"}</div>
-                <div className="text-xs text-muted-foreground">
-                  {it.quantity ?? 0} flak • {formatSEK(it.price_per_case)} / flak
-                </div>
-              </div>
-              <div className="font-semibold">{formatSEK(it.case_price)}</div>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    </div>
-  </TabsContent>
-))}
-  </Tabs>
-)}
           </CardContent>
         </Card>
       </div>

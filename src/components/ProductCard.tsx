@@ -33,7 +33,8 @@ export const ProductCard = ({ product, quantity, onQuantityChange }: ProductCard
       product.hasAlcohol ? "bg-red-600 text-white" : "bg-emerald-600 text-white"
     }`}
   >
-    {product.hasAlcohol ? "5 %" : "Alkoholfri"}
+    {product.hasAlcohol ? `Alkohol${product.alcoholPercent != null ? ` ${product.alcoholPercent}%` : ""}`
+    : "Alkoholfri"}
   </div>
 
   <div className="w-full h-full bg-card rounded-lg flex items-center justify-center">

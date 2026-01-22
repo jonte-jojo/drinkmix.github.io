@@ -4,7 +4,7 @@ import { ProductCard } from './ProductCard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShoppingCart, Citrus, Settings } from 'lucide-react';
-import { bilder } from '@/data/products'; 
+// import { bilder } from '@/data/products'; 
 import { ProductImageCard } from './ProductImageCard';
 
 interface ProductCatalogProps {
@@ -91,9 +91,9 @@ export const ProductCatalog = ({
           <TabsContent value={activeCategory} className="mt-0">
   {activeCategory === 'Produktbilder' ? (
     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {bilder.map((item) => (
+      {/* {bilder.map((item) => (
         <ProductImageCard key={item.id} item={item} />
-      ))}
+      ))} */}
     </div>
   ) : (
     <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

@@ -11,6 +11,7 @@ export interface Product {
   image: string;
   showInAll?: boolean;
   hasAlcohol: boolean;
+  alcoholPercent?: number | null;
 }
 
 export interface OrderItem {

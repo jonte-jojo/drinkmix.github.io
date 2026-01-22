@@ -17,6 +17,7 @@ export type ProductRow = {
   category: string | null;
   image: string | null;
   hasAlcohol: boolean;
+  alcoholPercent: number | null;
 };
 
 /**
@@ -37,6 +38,7 @@ export function dbToProduct(row: ProductRow): Product {
     category: (row.category ?? "") as Product["category"],
     image: row.image ?? "",
     hasAlcohol: row.hasAlcohol,
+    alcoholPercent: row.alcoholPercent ?? null,
   };
 }
 
@@ -60,6 +62,7 @@ export function productToDb(product: Product): Omit<ProductRow, "id"> & Partial<
     category: product.category,
     image: product.image,
     hasAlcohol: !!product.hasAlcohol,
+    alcoholPercent: product.alcoholPercent ?? null,
   };
 
   if (hasNumericId) payload.id = maybeId;

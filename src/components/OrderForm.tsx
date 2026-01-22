@@ -126,13 +126,19 @@ if (customerError) throw customerError;
         .from("orders")
         .insert([
           {
-            customer_id: customerData.id,
-            order_number: orderNumber,
-            order_date: orderDate,
-            notes: customer.notes,
-            total_price: totalPrice,
-            signature: signature,
-            permit_url: null,
+          customer_id: customerData.id,
+          order_number: orderNumber,
+          order_date: orderDate,
+          notes: customer.notes,
+          total_price: totalPrice,
+          signature: signature,
+          permit_url: null,
+
+          company_name: customer.companyName,
+          contact_person: customer.contactPerson,
+          phone: customer.phone,
+          address: customer.address,
+          email: customer.email,
           },
         ])
         .select()

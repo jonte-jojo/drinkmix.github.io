@@ -25,11 +25,17 @@ type OrderRow = {
   signature: string | null;
   permit_url: string | null;
   created_at?: string | null;
+
+  company_name: string | null;
+  contact_person: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
 };
 
 type OrderItemRow = {
   id?: string;
-  order_id: number;
+  order_id: string;
   product_id: string | null;
   product_name: string | null;
   quantity: number | null;
@@ -99,15 +105,7 @@ export function AdminCustomerOrders({
       try {
         const { data, error } = await supabase
           .from("customers")
-          .select(`
-            id,
-            company_name,
-            contact_person,
-            email,
-            phone,
-            address,
-            orders!inner(id)
-          `)
+          .select("id, customer_id, order_number, order_date, notes, total_price, signature, permit_url, created_at, company_name, contact_person, email, phone, address")
           .order("company_name", { ascending: true });
   
         if (error) throw error;
@@ -198,7 +196,7 @@ export function AdminCustomerOrders({
         const { data, error } = await supabase
           .from("order_items")
           .select("order_id, product_id, product_name, quantity, price_per_case, case_price")
-          .eq("order_id", Number(selectedOrderId))
+          .eq("order_id", selectedOrderId)
           .order("product_name", { ascending: true });
 
         if (error) throw error;
@@ -308,11 +306,11 @@ export function AdminCustomerOrders({
           <CardTitle className="text-base">Customer Information</CardTitle>
         </CardHeader>
         <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
-          <div><span className="text-muted-foreground">Company:</span> {selectedCompany?.company_name ?? "-"}</div>
-          <div><span className="text-muted-foreground">Contact:</span> {selectedCompany?.contact_person ?? "-"}</div>
-          <div><span className="text-muted-foreground">Email:</span> {selectedCompany?.email ?? "-"}</div>
-          <div><span className="text-muted-foreground">Phone:</span> {selectedCompany?.phone ?? "-"}</div>
-          <div className="sm:col-span-2"><span className="text-muted-foreground">Address:</span> {selectedCompany?.address ?? "-"}</div>
+          <div><span className="text-muted-foreground">Company:</span> {o.company_name ?? "-"}</div>
+          <div><span className="text-muted-foreground">Contact:</span> {o.contact_person ?? "-"}</div>
+          <div><span className="text-muted-foreground">Email:</span> {o.email ?? "-"}</div>
+          <div><span className="text-muted-foreground">Phone:</span> {o.phone ?? "-"}</div>
+          <div className="sm:col-span-2"><span className="text-muted-foreground">Address:</span> {o.address ?? "-"}</div>
         </CardContent>
       </Card>
 

@@ -7,7 +7,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 type CustomerRow = {
-  id: number;
+  id: string;
   company_name: string | null;
   contact_person: string | null;
   email: string | null;
@@ -17,7 +17,7 @@ type CustomerRow = {
 
 type OrderRow = {
   id: string;
-  customer_id: number;
+  customer_id: string;
   order_number: string | null;
   order_date: string | null;
   notes: string | null;
@@ -46,7 +46,7 @@ type OrderItemRow = {
 type CustomerGroup = {
     key: string;                 // normalized company name
     company_name: string;        // display name
-    customerIds: number[];       // ALL customer ids with same company_name
+    customerIds: string[];       // ALL customer ids with same company_name
     contact_person?: string | null;
     email?: string | null;
     phone?: string | null;
@@ -104,9 +104,17 @@ export function AdminCustomerOrders({
       setLoadingCustomers(true);
       try {
         const { data, error } = await supabase
-          .from("customers")
-          .select("id, customer_id, order_number, order_date, notes, total_price, signature, permit_url, created_at, company_name, contact_person, email, phone, address")
-          .order("company_name", { ascending: true });
+  .from("customers")
+  .select(`
+    id,
+    company_name,
+    contact_person,
+    email,
+    phone,
+    address,
+    orders!inner(id)
+  `)
+  .order("company_name", { ascending: true });
   
         if (error) throw error;
   
@@ -168,10 +176,14 @@ export function AdminCustomerOrders({
   
       try {
         const { data, error } = await supabase
-          .from("orders")
-          .select("id, customer_id, order_number, order_date, notes, total_price, signature, permit_url, created_at")
-          .in("customer_id", selectedCompany.customerIds)
-          .order("created_at", { ascending: false });
+  .from("orders")
+  .select(`
+    id, customer_id, order_number, order_date, notes, total_price,
+    signature, permit_url, created_at,
+    company_name, contact_person, email, phone, address
+  `)
+  .in("customer_id", selectedCompany.customerIds) // ✅ string[]
+  .order("created_at", { ascending: false });
   
         if (error) throw error;
   

@@ -48,13 +48,19 @@ type CustomerGroup = {
 };
 
 type OrderWithCustomer = OrderRow & {
-    customers: {
+    customers?: {
       company_name: string | null;
       contact_person: string | null;
       email: string | null;
       phone: string | null;
       address: string | null;
-    }[];
+    } | {
+      company_name: string | null;
+      contact_person: string | null;
+      email: string | null;
+      phone: string | null;
+      address: string | null;
+    }[] | null;
   };
 
 function isLikelyImageUrl(url: string) {
@@ -174,27 +180,27 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
 
       try {
         const { data, error } = await supabase
-          .from("orders")
-          .select(`
-            id,
-            customer_id,
-            order_number,
-            order_date,
-            notes,
-            total_price,
-            signature,
-            permit_url,
-            created_at,
-            customers:customer_id (
-              company_name,
-              contact_person,
-              email,
-              phone,
-              address
-            )
-          `)
-          .in("customer_id", selectedCompany.customerIds)
-          .order("created_at", { ascending: false });
+  .from("orders")
+  .select(`
+    id,
+    customer_id,
+    order_number,
+    order_date,
+    notes,
+    total_price,
+    signature,
+    permit_url,
+    created_at,
+    customers:customer_id!inner (
+      company_name,
+      contact_person,
+      email,
+      phone,
+      address
+    )
+  `)
+  .in("customer_id", selectedCompany.customerIds)
+  .order("created_at", { ascending: false });
 
         if (error) throw error;
 
@@ -314,9 +320,13 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
                   ))}
                 </TabsList>
 
-                {orders.map((o) => (
+                {orders.map((o) => {
+                    const cust = Array.isArray(o.customers) ? o.customers[0] : o.customers;
+                    return(
                   <TabsContent key={o.id} value={String(o.id)} className="mt-6">
+                    
                     <div className="space-y-6">
+                        
                       {/* Customer info */}
                       <Card>
                         <CardHeader>
@@ -325,23 +335,24 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
                         <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
                           <div>
                             <span className="text-muted-foreground">Company:</span>{" "}
-                            {o.customers?.[0].company_name ?? "-"}
+                            
+                            {cust?.company_name ?? "-"}
                           </div>
                           <div>
                             <span className="text-muted-foreground">Contact:</span>{" "}
-                            {o.customers?.[0].contact_person ?? "-"}
+                            {cust?.contact_person ?? "-"}
                           </div>
                           <div>
                             <span className="text-muted-foreground">Email:</span>{" "}
-                            {o.customers?.[0].email ?? "-"}
+                            {cust?.email ?? "-"}
                           </div>
                           <div>
                             <span className="text-muted-foreground">Phone:</span>{" "}
-                            {o.customers?.[0].phone ?? "-"}
+                            {cust?.phone ?? "-"}
                           </div>
                           <div className="sm:col-span-2">
                             <span className="text-muted-foreground">Address:</span>{" "}
-                            {o.customers?.[0].address ?? "-"}
+                            {cust?.address ?? "-"}
                           </div>
                         </CardContent>
                       </Card>
@@ -471,7 +482,8 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
                       </Card>
                     </div>
                   </TabsContent>
-                ))}
+                    );
+                          })}
               </Tabs>
             )}
           </CardContent>

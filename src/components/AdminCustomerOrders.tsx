@@ -37,6 +37,16 @@ type OrderItemRow = {
   case_price: number | null;
 };
 
+type CustomerGroup = {
+    key: string;                 // normalized company name
+    company_name: string;        // display name
+    customerIds: number[];       // ALL customer ids with same company_name
+    contact_person?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+  };
+
 function isLikelyImageUrl(url: string) {
   return /\.(png|jpe?g|webp|gif|bmp)$/i.test(url.split("?")[0]);
 }
@@ -60,8 +70,8 @@ export function AdminCustomerOrders({
 }: {
   onClose: () => void;
 }) {
-  const [customers, setCustomers] = useState<CustomerRow[]>([]);
-  const [selectedCustomerId, setSelectedCustomerId] = useState<number | null>(null);
+    const [companies, setCompanies] = useState<CustomerGroup[]>([]);
+    const [selectedCompanyKey, setSelectedCompanyKey] = useState<string | null>(null);
 
   const [orders, setOrders] = useState<OrderRow[]>([]);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -71,10 +81,10 @@ export function AdminCustomerOrders({
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [loadingOrderItems, setLoadingOrderItems] = useState(false);
 
-  const selectedCustomer = useMemo(
-    () => customers.find((c) => c.id === selectedCustomerId) ?? null,
-    [customers, selectedCustomerId]
-  );
+  const selectedCompany = useMemo(
+  () => companies.find((c) => c.key === selectedCompanyKey) ?? null,
+  [companies, selectedCompanyKey]
+);
 
   const selectedOrder = useMemo(
     () => orders.find((o) => o.id === selectedOrderId) ?? null,
@@ -83,15 +93,13 @@ export function AdminCustomerOrders({
 
   // 1) Load customers
   // 1) Load customers (ONLY customers that have at least 1 order)
-useEffect(() => {
+  useEffect(() => {
     (async () => {
       setLoadingCustomers(true);
       try {
-        // This returns one row per order => we dedupe customers in JS
         const { data, error } = await supabase
           .from("customers")
-          .select(
-            `
+          .select(`
             id,
             company_name,
             contact_person,
@@ -99,32 +107,50 @@ useEffect(() => {
             phone,
             address,
             orders!inner(id)
-          `
-          )
+          `)
           .order("company_name", { ascending: true });
   
         if (error) throw error;
   
         const rows = (data ?? []) as (CustomerRow & { orders?: { id: number }[] })[];
   
-        // Deduplicate customers (because inner join duplicates per order)
-        const byId = new Map<number, CustomerRow>();
+        // ✅ group by normalized company_name
+        const map = new Map<string, CustomerGroup>();
+  
         for (const r of rows) {
-          byId.set(r.id, {
-            id: r.id,
-            company_name: r.company_name,
-            contact_person: r.contact_person,
-            email: r.email,
-            phone: r.phone,
-            address: r.address,
-          });
+          const display = (r.company_name ?? "").trim();
+          const key = display.toLowerCase(); // normalize
+  
+          if (!key) continue; // skip totally empty names
+  
+          const existing = map.get(key);
+          if (!existing) {
+            map.set(key, {
+              key,
+              company_name: display,
+              customerIds: [r.id],
+              contact_person: r.contact_person,
+              email: r.email,
+              phone: r.phone,
+              address: r.address,
+            });
+          } else {
+            // add customer id to same shop
+            if (!existing.customerIds.includes(r.id)) existing.customerIds.push(r.id);
+  
+            // keep “best” display name if needed
+            if (!existing.company_name && display) existing.company_name = display;
+          }
         }
   
-        const uniqueCustomers = Array.from(byId.values());
-        setCustomers(uniqueCustomers);
+        const grouped = Array.from(map.values()).sort((a, b) =>
+          a.company_name.localeCompare(b.company_name, "sv")
+        );
   
-        if (uniqueCustomers.length && selectedCustomerId == null) {
-          setSelectedCustomerId(uniqueCustomers[0].id);
+        setCompanies(grouped);
+  
+        if (grouped.length && selectedCompanyKey == null) {
+          setSelectedCompanyKey(grouped[0].key);
         }
       } finally {
         setLoadingCustomers(false);
@@ -134,33 +160,32 @@ useEffect(() => {
   }, []);
   // 2) Load orders for selected customer
   useEffect(() => {
-    if (selectedCustomerId == null) return;
-
+    if (!selectedCompany) return;
+  
     (async () => {
       setLoadingOrders(true);
       setOrders([]);
       setSelectedOrderId(null);
       setOrderItems([]);
-
+  
       try {
         const { data, error } = await supabase
           .from("orders")
           .select("id, customer_id, order_number, order_date, notes, total_price, signature, permit_url, created_at")
-          .eq("customer_id", selectedCustomerId)
-          .order("id", { ascending: false });
-
+          .in("customer_id", selectedCompany.customerIds)
+          .order("created_at", { ascending: false });
+  
         if (error) throw error;
-
+  
         const rows = (data ?? []) as OrderRow[];
         setOrders(rows);
-
-        // auto-select newest order
+  
         if (rows.length) setSelectedOrderId(rows[0].id);
       } finally {
         setLoadingOrders(false);
       }
     })();
-  }, [selectedCustomerId]);
+  }, [selectedCompany]);
 
   // 3) Load items for selected order
   useEffect(() => {
@@ -216,28 +241,29 @@ useEffect(() => {
           <CardContent className="space-y-2">
             {loadingCustomers && <div className="text-muted-foreground">Laddar kunder...</div>}
 
-            {!loadingCustomers && customers.length === 0 && (
+            {!loadingCustomers && companies.length === 0 && (
               <div className="text-muted-foreground">Inga kunder hittades än.</div>
             )}
 
-            {customers.map((c) => {
-              const active = c.id === selectedCustomerId;
-              const title = c.company_name || "(Namnlös kund)";
-              const sub = [c.contact_person, c.email].filter(Boolean).join(" • ");
+{companies.map((c) => {
+  const active = c.key === selectedCompanyKey;
+  const title = c.company_name || "(Namnlös kund)";
+  const sub = [c.contact_person, c.email].filter(Boolean).join(" • ");
 
-              return (
-                <button
-                  key={c.id}
-                  onClick={() => setSelectedCustomerId(c.id)}
-                  className={`w-full text-left p-3 rounded-lg border transition ${
-                    active ? "border-primary bg-muted" : "border-border hover:bg-muted/50"
-                  }`}
-                >
-                  <div className="font-medium text-foreground">{title}</div>
-                  <div className="text-xs text-muted-foreground">{sub || "—"}</div>
-                </button>
-              );
-            })}
+  return (
+    <button
+      key={c.key}
+      onClick={() => setSelectedCompanyKey(c.key)}
+      className={`w-full text-left p-3 rounded-lg border transition ${
+        active ? "border-primary bg-muted" : "border-border hover:bg-muted/50"
+      }`}
+    >
+      <div className="font-medium text-foreground">{title}</div>
+      <div className="text-xs text-muted-foreground">{sub || "—"}</div>
+    </button>
+  );
+})}
+                  
           </CardContent>
         </Card>
 
@@ -245,8 +271,8 @@ useEffect(() => {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="font-heading text-xl">
-              {selectedCustomer ? (selectedCustomer.company_name ?? "Kund") : "Välj en kund"}
-            </CardTitle>
+            {selectedCompany ? (selectedCompany.company_name ?? "Kund") : "Välj en kund"}
+           </CardTitle>
           </CardHeader>
 
           <CardContent className="space-y-6">
@@ -282,11 +308,11 @@ useEffect(() => {
           <CardTitle className="text-base">Customer Information</CardTitle>
         </CardHeader>
         <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
-          <div><span className="text-muted-foreground">Company:</span> {selectedCustomer?.company_name ?? "-"}</div>
-          <div><span className="text-muted-foreground">Contact:</span> {selectedCustomer?.contact_person ?? "-"}</div>
-          <div><span className="text-muted-foreground">Email:</span> {selectedCustomer?.email ?? "-"}</div>
-          <div><span className="text-muted-foreground">Phone:</span> {selectedCustomer?.phone ?? "-"}</div>
-          <div className="sm:col-span-2"><span className="text-muted-foreground">Address:</span> {selectedCustomer?.address ?? "-"}</div>
+          <div><span className="text-muted-foreground">Company:</span> {selectedCompany?.company_name ?? "-"}</div>
+          <div><span className="text-muted-foreground">Contact:</span> {selectedCompany?.contact_person ?? "-"}</div>
+          <div><span className="text-muted-foreground">Email:</span> {selectedCompany?.email ?? "-"}</div>
+          <div><span className="text-muted-foreground">Phone:</span> {selectedCompany?.phone ?? "-"}</div>
+          <div className="sm:col-span-2"><span className="text-muted-foreground">Address:</span> {selectedCompany?.address ?? "-"}</div>
         </CardContent>
       </Card>
 

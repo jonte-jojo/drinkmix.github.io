@@ -16,7 +16,7 @@ export type ProductRow = {
   unit: string | null;
   category: string | null;
   image: string | null;
-  hasAlcohol: boolean;
+  has_alcohol: boolean;
   alcohol_percent: number | null;
 };
 
@@ -37,7 +37,7 @@ export function dbToProduct(row: ProductRow): Product {
     unit: row.unit ?? "",
     category: (row.category ?? "") as Product["category"],
     image: row.image ?? "",
-    hasAlcohol: row.hasAlcohol,
+    hasAlcohol: row.has_alcohol,
     alcoholPercent: row.alcohol_percent ?? null,
   };
 }
@@ -61,7 +61,7 @@ export function productToDb(product: Product): Omit<ProductRow, "id"> & Partial<
     unit: product.unit,
     category: product.category,
     image: product.image,
-    hasAlcohol: !!product.hasAlcohol,
+    has_alcohol: !!product.hasAlcohol,
     alcoholPercent: product.alcoholPercent ?? null,
   };
 

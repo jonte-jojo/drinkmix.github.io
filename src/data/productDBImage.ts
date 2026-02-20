@@ -1,4 +1,3 @@
-// src/data/bilderDB.ts
 import { supabase } from "@/lib/supabase";
 import type { Bilder } from "@/types/product";
 

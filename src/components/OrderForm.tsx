@@ -31,6 +31,10 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
     phone: '',
     address: '',
     notes: '',
+    orderDate: '',
+    invoice: '',
+    orgNumber: '',
+    deliveryDate: '',
   });
 
   const selectedProducts = Object.entries(orderItems)
@@ -112,8 +116,10 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
       email: customer.email,
       phone: customer.phone,
       address: customer.address,
+      invoice: customer.invoice,
+      orgNumber: customer.orgNumber,
     }],
-    { onConflict: "email" }
+    { onConflict: "email,company_name" }
   )
   .select()
   .single();
@@ -139,6 +145,9 @@ if (customerError) throw customerError;
           phone: customer.phone,
           address: customer.address,
           email: customer.email,
+          invoice: customer.invoice,
+          orgNumber: customer.orgNumber,
+          delivery_date: customer.deliveryDate,
           },
         ])
         .select()
@@ -195,6 +204,9 @@ if (customerError) throw customerError;
         order_details: orderLines,
         total_price: `${totalPrice} kr`,
         notes: customer.notes || "No notes",
+        invoice: customer.invoice || "N/A",
+        orgNumber: customer.orgNumber || "N/A",
+        delivery_date: customer.deliveryDate || "N/A",
       };
   
       console.log("SENDING EMAIL", emailParams);
@@ -298,7 +310,7 @@ if (customerError) throw customerError;
                   <div className="space-y-2">
                     <Label htmlFor="email" className="flex items-center gap-2">
                       <Mail className="w-4 h-4" />
-                      Email *
+                      Customer Email *
                     </Label>
                     <Input
                       id="email"
@@ -325,6 +337,32 @@ if (customerError) throw customerError;
                       className="h-12"
                     />
                   </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="invoice" className="flex items-center gap-2">
+                      <FileText className="w-4 h-4" />
+                      Invoice Reference *
+                    </Label>
+                    <Input
+                      id="invoice"
+                      value={customer.invoice}
+                      onChange={(e) => handleInputChange('invoice', e.target.value)}
+                      placeholder="Invoice email or reference"
+                      className="h-12"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="orgNumber" className="flex items-center gap-2">
+                      <Building2 className="w-4 h-4" />
+                      Organization Number *
+                    </Label>
+                    <Input
+                      id="orgNumber"
+                      value={customer.orgNumber}
+                      onChange={(e) => handleInputChange('orgNumber', e.target.value)}
+                      placeholder="Organization number"
+                      className="h-12"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -340,6 +378,34 @@ if (customerError) throw customerError;
                     className="h-12"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="deliveryDate" className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4" />
+                    Estimated Delivery Date
+                  </Label>
+                  <Input
+                    id="deliveryDate"
+                    type="date"
+                    value={customer.deliveryDate}
+                    onChange={(e) => handleInputChange('deliveryDate', e.target.value)}
+                    className="h-12"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="permit">Alkoholtillstånd (bild eller PDF)</Label>
+                    <Input
+                      id="permit"
+                      type="file"
+                      accept="image/*,application/pdf"
+                      capture="environment"
+                      onChange={(e) => setPermitFile(e.target.files?.[0] ?? null)}
+                  />
+                    {permitFile && (
+                      <p className="text-xs text-muted-foreground">
+                        Selected: {permitFile.name}
+                      </p>
+                    )}
+                  </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="notes" className="flex items-center gap-2">
@@ -366,21 +432,7 @@ if (customerError) throw customerError;
                 <SignaturePad signature={signature} onSignatureChange={setSignature} />
               </CardContent>
             </Card>
-            <div className="space-y-2">
-  <Label htmlFor="permit">Alkoholtillstånd (bild eller PDF)</Label>
-  <Input
-    id="permit"
-    type="file"
-    accept="image/*,application/pdf"
-    capture="environment"
-    onChange={(e) => setPermitFile(e.target.files?.[0] ?? null)}
-  />
-  {permitFile && (
-    <p className="text-xs text-muted-foreground">
-      Selected: {permitFile.name}
-    </p>
-  )}
-</div>
+            
           </div>
 
           {/* Order Summary */}

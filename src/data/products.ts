@@ -226,8 +226,20 @@ export const products: Product[] = [
     image: `${BASE}Citron-Ingefaralemonad.jpeg`,
     showInAll: false,
     hasAlcohol: true,
-
   },
+  {
+    id: "16",
+    name: "Citronlemonad flaska",
+    description:"citronlemonad i flaska",
+    unitPrice: 20,
+    casePrice: 480,
+    caseSize: 24,
+    unitLabel: "Flaska",
+    unit: "24 stycken per flak",
+    category: "lemonade",
+    image: `${BASE}citronlemonad-flaska.jpeg`,
+    hasAlcohol: false,
+  }
 ];
 
 export const bilder: Bilder[] = [

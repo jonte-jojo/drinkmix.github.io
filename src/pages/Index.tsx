@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ProductCatalog } from "@/components/ProductCatalog";
 import { OrderForm } from "@/components/OrderForm";
 import { OrderSuccess } from "@/components/OrderSuccess";
-import { AdminPinGate } from "@/components/AdminPinGate";
+import { AdminAuthGate } from "@/components/AdminPinGate";
 import { AdminCustomerOrders } from "@/components/AdminCustomerOrders";
 
 import type { Product } from "@/types/product";
@@ -87,7 +87,7 @@ const Index = () => {
       {currentView === "success" && <OrderSuccess onNewOrder={handleNewOrder} />}
 
       {currentView === "adminPin" && (
-        <AdminPinGate
+        <AdminAuthGate
           onCancel={() => setCurrentView("catalog")}
           onSuccess={() => setCurrentView("admin")}
         />

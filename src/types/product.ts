@@ -26,6 +26,10 @@ export interface CustomerInfo {
   phone: string;
   address: string;
   notes: string;
+  orderDate: string;
+  invoice: string;
+  orgNumber: string;
+  deliveryDate: string;
 }
 
 export interface Order {

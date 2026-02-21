@@ -22,6 +22,21 @@ export const ProductCard = ({ product, quantity, onQuantityChange }: ProductCard
     }
   };
 
+const isSockerlag = product.category === "Sockerlag";
+
+const unitLabel = (product.unitLabel ?? "").toLowerCase();
+
+const isBox =
+  unitLabel.includes("box") ||
+  unitLabel.includes("låda") ||
+  unitLabel.includes("flak");
+
+const isBottleCase =
+  product.category === "lemonade" && !isSockerlag && !isBox;
+  
+
+const isLiquor = product.category === "liquers";
+
   return (
     
     <Card
@@ -69,9 +84,28 @@ export const ProductCard = ({ product, quantity, onQuantityChange }: ProductCard
   </span>
 
   {/* Minimum order info */}
+{isSockerlag && (
   <span className="text-xs text-muted-foreground block">
-    Min order: 1 flak ({product.caseSize} {product.unitLabel}) • {product.casePrice} kr / flak
+    Min order: 1 flaska
   </span>
+)}
+
+{isBottleCase && (
+  <span className="text-xs text-muted-foreground block">
+    Min order: 2 flak ({product.caseSize} flaskor) • {product.casePrice} kr / flak
+  </span>
+)}
+
+{isLiquor && (
+  <span className="text-xs text-muted-foreground block">
+    Min order: 1 flaska 
+  </span>
+)}
+{isBox && (
+  <span className="text-xs text-muted-foreground block">
+    Min order: 1 {unitLabel.includes("låda") ? "låda" : "box"}
+  </span>
+)}
 </div>
         </div>
         <div className="flex items-center justify-center gap-4 bg-muted rounded-lg p-2">

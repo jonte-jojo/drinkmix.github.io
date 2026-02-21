@@ -75,7 +75,7 @@ export async function fetchProductsFromDB(): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
     .select("*")
-    .order("id", { ascending: true });
+    .order("Sort_order", { ascending: true });
 
   if (error) throw error;
 

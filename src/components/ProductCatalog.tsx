@@ -25,22 +25,64 @@ export const ProductCatalog = ({
 }: ProductCatalogProps) => {
   const [activeCategory, setActiveCategory] = useState<'all' | 'lemonade' | 'liquers' | 'Sockerlag'| 'Produktbilder'>('all');
 
-  const handleQuantityChange = (productId: string, quantity: number) => {
-    onOrderItemsChange({
-      ...orderItems,
-      [productId]: quantity,
-    });
-  };
+const normalize = (s?: string) => (s ?? "").toLowerCase();
+
+const isSockerlag = (p: Product) => normalize(p.category) === "sockerlag";
+
+const isCaseProduct = (p: Product) => p.caseSize === 24 !== isSockerlag(p); 
+// If sockerlag has caseSize 24 but should be single item, use:
+// const isCaseProduct = (p: Product) => p.caseSize === 24 && p.category !== "Sockerlag";
+
+const priceEach = (p: Product) => (isCaseProduct(p) ? p.casePrice : p.unitPrice);
+
+const getMinOrder = (_p: Product) => 1;
+
+const increment = (productId: string) => {
+  const product = products.find((p) => p.id === productId);
+  if (!product) return;
+
+  const current = orderItems[productId] || 0;
+  const min = getMinOrder(product);
+
+  const next = current === 0 ? min : current + 1;
+
+  onOrderItemsChange({
+    ...orderItems,
+    [productId]: next,
+  });
+};
+
+const decrement = (productId: string) => {
+  const product = products.find((p) => p.id === productId);
+  if (!product) return;
+
+  const current = orderItems[productId] || 0;
+  if (current === 0) return;
+
+  const min = getMinOrder(product);
+
+  // If decreasing below minimum → remove product entirely
+  const next = current <= min ? 0 : current - 1;
+
+  const updated = { ...orderItems };
+  if (next === 0) delete updated[productId];
+  else updated[productId] = next;
+
+  onOrderItemsChange(updated);
+};
 
   const filteredProducts = activeCategory === 'all' ? products.filter((p) => p.showInAll !== false) : products.filter((p) => p.category === activeCategory);
   const productImages = products
   .filter((p) => p.image) // only products that have an image
   ;
   const totalItems = Object.values(orderItems).reduce((sum, qty) => sum + qty, 0);
-  const totalPrice = Object.entries(orderItems).reduce((sum, [productId, qty]) => {
-    const product = products.find((p) => p.id === productId);
-    return sum + (product ? product.casePrice * qty : 0);
-  }, 0);
+
+const totalPrice = Object.entries(orderItems).reduce((sum, [productId, qty]) => {
+  const product = products.find((p) => p.id === productId);
+  if (!product) return sum;
+
+  return sum + priceEach(product) * qty;
+}, 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -65,7 +107,7 @@ export const ProductCatalog = ({
                   className="bg-secondary hover:bg-secondary/90 text-secondary-foreground gap-2 text-lg px-6"
                 >
                   <ShoppingCart className="w-5 h-5" />
-                  Order ({totalItems} flak) - {totalPrice} kr
+                  Order ({totalItems}) - {totalPrice} kr
                 </Button>
               )}
               
@@ -104,7 +146,8 @@ export const ProductCatalog = ({
         key={product.id}
         product={product}
         quantity={orderItems[product.id] || 0}
-        onQuantityChange={handleQuantityChange}
+        onIncrement={increment}
+        onDecrement={decrement}
       />
     ))}
   </div>

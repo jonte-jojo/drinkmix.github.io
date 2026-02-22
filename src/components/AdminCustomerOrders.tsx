@@ -25,6 +25,14 @@ type OrderRow = {
   signature: string | null;
   permit_url: string | null;
   created_at?: string | null;
+  invoice?: string | null;
+  orgNumber?: string | null;
+  delivery_date?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  contact_person?: string | null;
+  email?: string | null;
+  company_name?: string | null;
 };
 
 type OrderItemRow = {
@@ -145,6 +153,7 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
               email: r.email,
               phone: r.phone,
               address: r.address,
+              
             });
           } else {
             if (!existing.customerIds.includes(r.id)) existing.customerIds.push(r.id);
@@ -191,6 +200,16 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
     signature,
     permit_url,
     created_at,
+
+    invoice,
+    orgNumber,
+    delivery_date,
+    phone,
+    address,
+    contact_person,
+    email,
+    company_name,
+
     customers:customer_id!inner (
       company_name,
       contact_person,
@@ -327,35 +346,63 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
                     
                     <div className="space-y-6">
                         
+                      
                       {/* Customer info */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">Customer Information</CardTitle>
-                        </CardHeader>
-                        <CardContent className="grid sm:grid-cols-2 gap-3 text-sm">
-                          <div>
-                            <span className="text-muted-foreground">Company:</span>{" "}
-                            
-                            {cust?.company_name ?? "-"}
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Contact:</span>{" "}
-                            {cust?.contact_person ?? "-"}
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Email:</span>{" "}
-                            {cust?.email ?? "-"}
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Phone:</span>{" "}
-                            {cust?.phone ?? "-"}
-                          </div>
-                          <div className="sm:col-span-2">
-                            <span className="text-muted-foreground">Address:</span>{" "}
-                            {cust?.address ?? "-"}
-                          </div>
-                        </CardContent>
-                      </Card>
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-base">Customer Information</CardTitle>
+                            </CardHeader>
+
+                            <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4 text-sm">
+
+                              {/* Company */}
+                              <div>
+                                <div className="text-muted-foreground text-xs">Company</div>
+                                <div className="font-medium">{cust?.company_name ?? "-"}</div>
+                              </div>
+
+                              {/* Contact */}
+                              <div>
+                                <div className="text-muted-foreground text-xs">Contact</div>
+                                <div className="font-medium">{cust?.contact_person ?? "-"}</div>
+                              </div>
+
+                              {/* Email */}
+                              <div>
+                                <div className="text-muted-foreground text-xs">Email</div>
+                                <div className="font-medium">{cust?.email ?? "-"}</div>
+                              </div>
+
+                              {/* Phone */}
+                              <div>
+                                <div className="text-muted-foreground text-xs">Phone</div>
+                                <div className="font-medium">{cust?.phone ?? "-"}</div>
+                              </div>
+
+                              {/* Address + Org number (same row) */}
+                              <div>
+                                <div className="text-muted-foreground text-xs">Address</div>
+                                <div className="font-medium">{cust?.address ?? "-"}</div>
+                              </div>
+
+                              <div>
+                                <div className="text-muted-foreground text-xs">Org number</div>
+                                <div className="font-medium">{o.orgNumber ?? "-"}</div>
+                              </div>
+
+                              {/* Invoice + Delivery (same row) */}
+                              <div>
+                                <div className="text-muted-foreground text-xs">Invoice info</div>
+                                <div className="font-medium">{o.invoice ?? "-"}</div>
+                              </div>
+
+                              <div>
+                                <div className="text-muted-foreground text-xs">Delivery date</div>
+                                <div className="font-medium">{o.delivery_date ?? "-"}</div>
+                              </div>
+
+                            </CardContent>
+                          </Card>
 
                       {/* Order meta */}
                       <Card>
@@ -376,7 +423,7 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
                           </div>
                           <div>
                             <span className="text-muted-foreground">Total:</span>{" "}
-                            {formatSEK(o.total_price)}
+                            {formatSEK(o.total_price)}, exkl. moms
                           </div>
                           <div className="sm:col-span-2">
                             <span className="text-muted-foreground">Notes:</span> {o.notes ?? "-"}
@@ -432,28 +479,8 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
                             )}
                           </div>
 
-                          {/* Signature */}
-                          <div className="sm:col-span-2">
-                            <div className="text-muted-foreground mb-2">Signature</div>
-                            {!o.signature ? (
-                              <div className="text-muted-foreground text-sm">Ingen signatur sparad.</div>
-                            ) : (
-                              <img
-                                src={o.signature}
-                                alt="Signature"
-                                className="max-h-56 rounded-md border bg-white object-contain"
-                              />
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-
-                      {/* Items */}
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-base">Items</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3">
+                          {/* Items */}
+                      
                           {loadingOrderItems && (
                             <div className="text-muted-foreground">Laddar items...</div>
                           )}
@@ -478,6 +505,20 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
                               <div className="font-semibold">{formatSEK(it.case_price)}</div>
                             </div>
                           ))}
+                       
+                          {/* Signature */}
+                          <div className="sm:col-span-2">
+                            <div className="text-muted-foreground mb-2">Signature</div>
+                            {!o.signature ? (
+                              <div className="text-muted-foreground text-sm">Ingen signatur sparad.</div>
+                            ) : (
+                              <img
+                                src={o.signature}
+                                alt="Signature"
+                                className="max-h-56 rounded-md border bg-white object-contain"
+                              />
+                            )}
+                          </div>
                         </CardContent>
                       </Card>
                     </div>

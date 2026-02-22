@@ -7,20 +7,21 @@ import { useNavigate } from "react-router-dom";
 interface ProductCardProps {
   product: Product;
   quantity: number;
-  onQuantityChange: (productId: string, quantity: number) => void;
+  onIncrement: (productId: string) => void;
+  onDecrement: (productId: string) => void;
 }
 
-export const ProductCard = ({ product, quantity, onQuantityChange }: ProductCardProps) => {
+export const ProductCard = ({ product, quantity, onIncrement, onDecrement }: ProductCardProps) => {
   const navigate = useNavigate();
-  const handleIncrement = () => {
-    onQuantityChange(product.id, quantity + 1);
-  };
 
   const handleDecrement = () => {
     if (quantity > 0) {
-      onQuantityChange(product.id, quantity - 1);
+      onDecrement(product.id);
     }
   };
+  const handleIncrement = () => {
+    onIncrement(product.id);
+  }
 
 const isSockerlag = product.category === "Sockerlag";
 
@@ -31,8 +32,13 @@ const isBox =
   unitLabel.includes("låda") ||
   unitLabel.includes("flak");
 
+const is75CL =
+  product.category === "lemonade" && product.caseSize===12;
+
 const isBottleCase =
-  product.category === "lemonade" && !isSockerlag && !isBox;
+  product.category === "lemonade" && !isSockerlag && !isBox && !is75CL;
+
+
   
 
 const isLiquor = product.category === "liquers";
@@ -84,28 +90,20 @@ const isLiquor = product.category === "liquers";
   </span>
 
   {/* Minimum order info */}
-{isSockerlag && (
-  <span className="text-xs text-muted-foreground block">
-    Min order: 1 flaska
-  </span>
-)}
 
 {isBottleCase && (
   <span className="text-xs text-muted-foreground block">
-    Min order: 2 flak ({product.caseSize} flaskor) • {product.casePrice} kr / flak
+    1 låda ({product.caseSize} flaskor), {product.casePrice} kr / låda
   </span>
 )}
 
-{isLiquor && (
+{is75CL && (
   <span className="text-xs text-muted-foreground block">
-    Min order: 1 flaska 
+    1 låda ({product.caseSize} flaskor), {product.casePrice} kr / låda
   </span>
 )}
-{isBox && (
-  <span className="text-xs text-muted-foreground block">
-    Min order: 1 {unitLabel.includes("låda") ? "låda" : "box"}
-  </span>
-)}
+
+
 </div>
         </div>
         <div className="flex items-center justify-center gap-4 bg-muted rounded-lg p-2">

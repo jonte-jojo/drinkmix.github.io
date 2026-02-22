@@ -12,9 +12,30 @@ function normalizeProduct(p: any): Product {
       ? p.price
       : 0;
 
-  const caseSize = typeof p.caseSize === 'number' ? p.caseSize : guessCaseSizeFromUnit(p.unit);
+  const category = (p.category === "liquer" ? "Likör" : p.category) ?? "Lemonad";
+const isLemonade = category === "Lemonad";
 
-  const unitLabel = typeof p.unitLabel === 'string' && p.unitLabel.trim() !== '' ? p.unitLabel : 'st';
+const unitLabel = typeof p.unitLabel === "string" && p.unitLabel.trim() !== "" ? p.unitLabel : "st";
+const unitLabelLc = unitLabel.toLowerCase();
+
+const isBottle =
+  unitLabelLc.includes("flaska") ||
+  unitLabelLc.includes("bottle");
+
+const isBoxLike =
+  unitLabelLc.includes("låda") ||
+  unitLabelLc.includes("flak") ||
+  unitLabelLc.includes("box") ||
+  unitLabelLc.includes("case");
+
+// ✅ KEY RULE:
+// - Lemonade: can have caseSize (24 etc)
+// - Everything else: treat as single item (caseSize = 1)
+const caseSize =
+  isLemonade
+    ? (typeof p.caseSize === "number" ? p.caseSize : guessCaseSizeFromUnit(p.unit))
+    : 1;
+
 
   const inferredHasAlcohol =
   typeof p.hasAlcohol === "boolean"
@@ -33,16 +54,14 @@ function normalizeProduct(p: any): Product {
       ? p.unit
       : `${caseSize} ${unitLabel} per flak`;
 
-  // ✅ Fix category typo if any old saved products had "liquer"
-  let category = p.category;
-  if (category === 'liquer') category = 'liquers';
+  
 
   return {
     id: p.id ?? crypto.randomUUID(),
     name: p.name ?? 'Unnamed product',
     description: p.description ?? '',
     image: p.image ?? '/placeholder.svg',
-    category: category ?? 'lemonade',
+    category: category ?? 'Lemonad',
 
     // new fields
     unitPrice,

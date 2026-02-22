@@ -207,6 +207,9 @@ if (customerError) throw customerError;
         invoice: customer.invoice || "N/A",
         orgNumber: customer.orgNumber || "N/A",
         delivery_date: customer.deliveryDate || "N/A",
+        permit_url: permitUrl || "No permit uploaded",
+        phone: customer.phone || "N/A",
+        address: customer.address || "N/A",
       };
   
       console.log("SENDING EMAIL", emailParams);
@@ -405,6 +408,18 @@ if (customerError) throw customerError;
                         Selected: {permitFile.name}
                       </p>
                     )}
+                    
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    id="permitSeen"
+                    type="checkbox"
+                    required
+                    className="h-4 w-4 text-secondary focus:ring-secondary border-border rounded"
+                  />
+                  <Label htmlFor="permitSeen" className="text-sm text-muted-foreground">
+                    I confirm that I have reviewed the alcohol permit.
+                  </Label>
                   </div>
 
                 <div className="space-y-2">
@@ -499,7 +514,7 @@ if (customerError) throw customerError;
                     <span className="text-xl font-heading font-semibold">Total</span>
                     <span className="text-3xl font-bold text-secondary">{totalPrice} kr</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">excl. VAT</p>
+                  <p className="text-sm text-muted-foreground mt-1">excl. moms</p>
                   <div className='text-center mt-1'>
                   <span className='text-sm text-muted-foreground' >(Fakturering sker via Prioritet Finans)</span>
                 </div>

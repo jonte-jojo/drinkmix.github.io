@@ -414,7 +414,6 @@ if (customerError) throw customerError;
                   <input
                     id="permitSeen"
                     type="checkbox"
-                    required
                     className="h-4 w-4 text-secondary focus:ring-secondary border-border rounded"
                   />
                   <Label htmlFor="permitSeen" className="text-sm text-muted-foreground">

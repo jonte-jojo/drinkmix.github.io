@@ -94,7 +94,7 @@ const totalPrice = Object.entries(orderItems).reduce((sum, [productId, qty]) => 
                 <Citrus className="w-7 h-7 text-foreground" />
               </div>
               <div>
-                <h1 className="font-heading text-2xl font-bold text-foreground">drinkmix.nu</h1>
+                <h1 className="font-heading text-2xl font-bold text-foreground">Glommens Dryckesfabrik</h1>
                 <p className="text-sm text-muted-foreground">Premium Lemonad & Likör</p>
               </div>
             </div>

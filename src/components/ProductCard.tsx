@@ -33,15 +33,15 @@ const isBox =
   unitLabel.includes("flak");
 
 const is75CL =
-  product.category === "lemonade" && product.caseSize===12;
+  product.category === "Lemonad" && product.caseSize===12;
 
 const isBottleCase =
-  product.category === "lemonade" && !isSockerlag && !isBox && !is75CL;
+  product.category === "Lemonad" && !isSockerlag && !isBox && !is75CL;
 
 
   
 
-const isLiquor = product.category === "liquers";
+const isLiquor = product.category === "Likör";
 
   return (
     
@@ -72,7 +72,7 @@ const isLiquor = product.category === "liquers";
             {product.name}
           </h3>
           <span className={`text-xs px-2 py-1 rounded-full whitespace-nowrap ${
-            product.category === 'lemonade' 
+            product.category === 'Lemonad' 
               ? 'bg-citrus-yellow/30 text-foreground' 
               : 'bg-citrus-orange/30 text-foreground'
           }`}>

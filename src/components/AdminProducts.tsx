@@ -11,7 +11,7 @@ function uid() {
   return crypto?.randomUUID?.() ?? `p_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
-type Category = 'lemonade' | 'liquers' | 'Sockerlag';
+type Category = 'Lemonad' | 'Likör' | 'Sockerlag';
 
 export function AdminProducts({
   products,
@@ -50,7 +50,7 @@ export function AdminProducts({
       caseSize,
       unitLabel: 'st',
       unit: `${caseSize} st per flak`,
-      category: 'lemonade',
+      category: 'Lemonad',
       image: '/placeholder.svg',
       hasAlcohol: false,
     };
@@ -217,8 +217,8 @@ export function AdminProducts({
                       onChange={(e) => updateSelected({ category: e.target.value as Category })}
                       className="h-12 w-full rounded-md border border-input bg-background px-3 text-sm"
                     >
-                      <option value="lemonade">lemonade</option>
-                      <option value="liquers">liquers</option>
+                      <option value="Lemonad">Lemonad</option>
+                      <option value="Likör">Likör</option>
                       <option value="Sockerlag">Sockerlag</option>
                     </select>
                   </div>

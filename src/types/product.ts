@@ -7,7 +7,7 @@ export interface Product {
   caseSize: number;     // bottles in box
   unitLabel: string;
   unit: string;
-  category: 'lemonade' | 'liquers' | 'Sockerlag';
+  category: 'Lemonad' | 'Likör' | 'Sockerlag';
   image: string;
   showInAll?: boolean;
   hasAlcohol: boolean;

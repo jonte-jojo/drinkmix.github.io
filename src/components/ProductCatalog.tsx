@@ -23,7 +23,7 @@ export const ProductCatalog = ({
   onProceedToOrder,
   onOpenAdmin,
 }: ProductCatalogProps) => {
-  const [activeCategory, setActiveCategory] = useState<'all' | 'lemonade' | 'liquers' | 'Sockerlag'| 'Produktbilder'>('all');
+  const [activeCategory, setActiveCategory] = useState<'all' | 'Lemonad' | 'Likör' | 'Sockerlag'| 'Produktbilder'>('all');
 
 const normalize = (s?: string) => (s ?? "").toLowerCase();
 
@@ -95,7 +95,7 @@ const totalPrice = Object.entries(orderItems).reduce((sum, [productId, qty]) => 
               </div>
               <div>
                 <h1 className="font-heading text-2xl font-bold text-foreground">drinkmix.nu</h1>
-                <p className="text-sm text-muted-foreground">Premium Lemonade & liquer</p>
+                <p className="text-sm text-muted-foreground">Premium Lemonad & Likör</p>
               </div>
             </div>
 
@@ -126,8 +126,8 @@ const totalPrice = Object.entries(orderItems).reduce((sum, [productId, qty]) => 
         <Tabs defaultValue="all" onValueChange={(v) => setActiveCategory(v as any)}>
         <TabsList className="grid w-full max-w-2xl grid-cols-5 mb-10 h-18">
             <TabsTrigger value="all" className="text-lg">All Products</TabsTrigger>
-            <TabsTrigger value="lemonade" className="text-lg">Lemonad</TabsTrigger>
-            <TabsTrigger value="liquers" className="text-lg">Likör</TabsTrigger>
+            <TabsTrigger value="Lemonad" className="text-lg">Lemonad</TabsTrigger>
+            <TabsTrigger value="Likör" className="text-lg">Likör</TabsTrigger>
             <TabsTrigger value="Sockerlag" className='text-lg'>Sockerlag</TabsTrigger>
             <TabsTrigger value="Produktbilder" className='text-lg' >Produktbilder</TabsTrigger>
           </TabsList>

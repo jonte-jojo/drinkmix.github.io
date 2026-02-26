@@ -37,6 +37,15 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
     deliveryDate: '',
   });
 
+
+  const normalize = (s?: string) => (s ?? "").toLowerCase();
+  
+  const isSockerlag = (p: Product) => normalize(p.category) === "sockerlag";
+  const isCaseProduct = (p: Product) => p.caseSize === 24 !== isSockerlag(p);
+  const priceEach = (p: Product) => (isCaseProduct(p) ? p.casePrice : p.unitPrice);
+  
+
+
   const selectedProducts = Object.entries(orderItems)
     .filter(([_, qty]) => qty > 0)
     .map(([productId, quantity]) => ({
@@ -46,7 +55,7 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
     .filter((x): x is { product: Product; quantity: number } => Boolean(x.product));
 
   const totalPrice = selectedProducts.reduce(
-    (sum, item) => sum + item.product.casePrice * item.quantity,
+    (sum, { product, quantity }) => sum + priceEach(product) * quantity,
     0
   );
 
@@ -191,7 +200,9 @@ if (customerError) throw customerError;
   
       // ✅ 4) SEND EMAIL CONFIRMATION
       const orderLines = selectedProducts
-        .map(({ product, quantity }) => `${product.name} - ${quantity} flak`)
+        .map(({ product, quantity }) =>
+          `${product.name} - ${quantity} ${isCaseProduct(product) ? "flak" : product.unitLabel}`
+        )
         .join("\n");
         
         
@@ -498,10 +509,10 @@ if (customerError) throw customerError;
     {/* ✅ Price */}
     <div className="text-right">
       <p className="font-semibold text-foreground">
-        {product.casePrice * quantity} kr
+        {priceEach(product) * quantity} kr
       </p>
       <p className="text-xs text-muted-foreground">
-        {product.casePrice} kr / flak
+        {priceEach(product)} kr / {isCaseProduct(product) ? "flak" : product.unitLabel}
       </p>
     </div>
   </div>

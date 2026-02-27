@@ -108,6 +108,7 @@ const exportAllOrdersToExcel = async () => {
         invoice,
         orgNumber,
         delivery_date,
+        created_at,
         customers:customer_id (
           company_name,
           contact_person,
@@ -126,42 +127,52 @@ const exportAllOrdersToExcel = async () => {
 
     if (itemsError) throw itemsError;
 
-    const rows = allOrders.flatMap((o) => {
-      const cust = Array.isArray(o.customers)
-        ? o.customers[0]
-        : o.customers;
+    // ✅ Build a lookup map: order_id -> items[]
+    const itemsByOrderId = new Map<string, typeof allItems>();
 
-      const itemsForOrder = allItems.filter(
-        (item) => item.order_id === o.id
+    for (const it of allItems ?? []) {
+      const arr = itemsByOrderId.get(it.order_id) ?? [];
+      arr.push(it);
+      itemsByOrderId.set(it.order_id, arr);
+    }
+
+    const rows = (allOrders ?? []).map((o) => {
+      const custRaw: any = (o as any).customers;
+      const cust = Array.isArray(custRaw) ? custRaw[0] : custRaw;
+
+      const itemsForOrder = itemsByOrderId.get(o.id) ?? [];
+
+      const itemsText = itemsForOrder
+        .map((it) => `${it.product_name ?? "Unknown"} x${it.quantity ?? 0}`)
+        .join("; ");
+
+      const orderTotalFromItems = itemsForOrder.reduce(
+        (sum, it) => sum + (it.case_price ?? 0),
+        0
       );
 
-      return itemsForOrder.map((item) => ({
+      return {
+        OrderNumber: o.order_number ?? "",
+        OrderDate: o.order_date ?? "",
+        DeliveryDate: o.delivery_date ?? "",
         Company: cust?.company_name ?? "",
         Contact: cust?.contact_person ?? "",
         Email: cust?.email ?? "",
         Phone: cust?.phone ?? "",
         Address: cust?.address ?? "",
-        OrderNumber: o.order_number ?? "",
-        OrderDate: o.order_date ?? "",
-        DeliveryDate: o.delivery_date ?? "",
         OrgNumber: o.orgNumber ?? "",
         Invoice: o.invoice ?? "",
-        Product: item.product_name ?? "",
-        Quantity: item.quantity ?? 0,
-        PricePerCase: item.price_per_case ?? 0,
-        RowTotal: item.case_price ?? 0,
-        OrderTotal: o.total_price ?? 0,
+        Items: itemsText,
+        OrderTotal: o.total_price ?? orderTotalFromItems,
         Notes: o.notes ?? "",
-      }));
+      };
     });
 
-    // 4️⃣ Generate Excel
     const worksheet = XLSX.utils.json_to_sheet(rows);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "All Orders");
 
     XLSX.writeFile(workbook, "All_Customer_Orders.xlsx");
-
   } catch (error) {
     console.error("Export failed:", error);
   }

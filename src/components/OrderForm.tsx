@@ -10,7 +10,6 @@ import { ArrowLeft, Send, Building2, User, Mail, Phone, MapPin, FileText, Citrus
 import { useToast } from '@/hooks/use-toast';
 import emailjs from "@emailjs/browser";
 import { supabase } from "@/lib/supabase";
-import { useEffect } from "react";
 
 interface OrderFormProps {
   products: Product[];
@@ -39,18 +38,6 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
     orgNumber: '',
     deliveryDate: '',
   });
-
-  const [adminEmail, setAdminEmail] = useState<string>("");
-  useEffect(() => {
-      const getUser = async () => {
-        const { data, error } = await supabase.auth.getUser();
-        if (!error && data.user) {
-          setAdminEmail(data.user.email ?? "");
-        }
-      };
-
-      getUser();
-    }, []);
 
 
   const normalize = (s?: string) => (s ?? "").toLowerCase();
@@ -125,6 +112,7 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
       });
       return;
     }
+    
   
     setIsSubmitting(true);
   
@@ -211,9 +199,7 @@ if (customerError) throw customerError;
         .insert(itemsToInsert);
   
       if (itemsError) throw itemsError;
-
-      const { data: userData } = await supabase.auth.getUser();
-      const currentAdminEmail = userData.user?.email ?? adminEmail ?? "";
+  
       // ✅ 4) SEND EMAIL CONFIRMATION
       const orderLines = selectedProducts
         .map(({ product, quantity }) =>
@@ -221,9 +207,9 @@ if (customerError) throw customerError;
         )
         .join("\n");
         
+        
       const emailParams = {
         to_email: customer.email,
-        admin_email: currentAdminEmail,
         company: customer.companyName,
         contact: customer.contactPerson,
         order_number: orderNumber,

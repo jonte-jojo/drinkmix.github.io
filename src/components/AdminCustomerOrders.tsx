@@ -95,35 +95,78 @@ function formatOrderDate(o: { order_date: string | null; created_at?: string | n
   return d.toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" });
 }
 
-const exportOrdersToExcel = (orders: OrderWithCustomer[], orderItems: OrderItemRow[]) => {
-  const rows = orders.map((o) => {
-    const cust = Array.isArray(o.customers) ? o.customers[0] : o.customers;
-    const items = orderItems
-      .filter((it) => it.order_id === o.id)
-      .map((it) => `${it.product_name} (${it.quantity} flak)`);
+const exportAllOrdersToExcel = async () => {
+  try {
+    const { data: allOrders, error: ordersError } = await supabase
+      .from("orders")
+      .select(`
+        id,
+        order_number,
+        order_date,
+        total_price,
+        notes,
+        invoice,
+        orgNumber,
+        delivery_date,
+        customers:customer_id (
+          company_name,
+          contact_person,
+          email,
+          phone,
+          address
+        )
+      `)
+      .order("created_at", { ascending: false });
 
-    return {
-      "Order ID": o.id,
-      "Order Number": o.order_number,
-      "Order Date": o.order_date,
-      "Company": cust?.company_name ?? "",
-      "Contact Person": cust?.contact_person ?? "",
-      "Email": cust?.email ?? "",
-      "Phone": cust?.phone ?? "",
-      "Address": cust?.address ?? "",
-      "Org Number": o.orgNumber ?? "",
-      "Invoice Info": o.invoice ?? "",
-      "Delivery Date": o.delivery_date ?? "",
-      "Notes": o.notes ?? "",
-      "Items": items.join("; "),
-    };
-  });
-  
-  const worksheet = XLSX.utils.json_to_sheet(rows);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
-  XLSX.writeFile(workbook, "orders.xlsx");
+    if (ordersError) throw ordersError;
+
+    const { data: allItems, error: itemsError } = await supabase
+      .from("order_items")
+      .select("order_id, product_name, quantity, price_per_case, case_price");
+
+    if (itemsError) throw itemsError;
+
+    const rows = allOrders.flatMap((o) => {
+      const cust = Array.isArray(o.customers)
+        ? o.customers[0]
+        : o.customers;
+
+      const itemsForOrder = allItems.filter(
+        (item) => item.order_id === o.id
+      );
+
+      return itemsForOrder.map((item) => ({
+        Company: cust?.company_name ?? "",
+        Contact: cust?.contact_person ?? "",
+        Email: cust?.email ?? "",
+        Phone: cust?.phone ?? "",
+        Address: cust?.address ?? "",
+        OrderNumber: o.order_number ?? "",
+        OrderDate: o.order_date ?? "",
+        DeliveryDate: o.delivery_date ?? "",
+        OrgNumber: o.orgNumber ?? "",
+        Invoice: o.invoice ?? "",
+        Product: item.product_name ?? "",
+        Quantity: item.quantity ?? 0,
+        PricePerCase: item.price_per_case ?? 0,
+        RowTotal: item.case_price ?? 0,
+        OrderTotal: o.total_price ?? 0,
+        Notes: o.notes ?? "",
+      }));
+    });
+
+    // 4️⃣ Generate Excel
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "All Orders");
+
+    XLSX.writeFile(workbook, "All_Customer_Orders.xlsx");
+
+  } catch (error) {
+    console.error("Export failed:", error);
+  }
 };
+  
 
 export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
   const [companies, setCompanies] = useState<CustomerGroup[]>([]);
@@ -301,7 +344,7 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
               <p className="text-sm text-muted-foreground">Kunder & ordrar</p>
             </div>
           </div>
-          <Button onClick={() => exportOrdersToExcel(orders, orderItems)} className="mt-2">
+          <Button onClick={() => exportAllOrdersToExcel()} className="h-10">
                 Export to Excel
               </Button>
         </div>

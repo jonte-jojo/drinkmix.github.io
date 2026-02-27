@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, FileText } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import * as  XLSX from "xlsx";
 
 type CustomerRow = {
   id: string; // uuid
@@ -93,6 +94,36 @@ function formatOrderDate(o: { order_date: string | null; created_at?: string | n
 
   return d.toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" });
 }
+
+const exportOrdersToExcel = (orders: OrderWithCustomer[], orderItems: OrderItemRow[]) => {
+  const rows = orders.map((o) => {
+    const cust = Array.isArray(o.customers) ? o.customers[0] : o.customers;
+    const items = orderItems
+      .filter((it) => it.order_id === o.id)
+      .map((it) => `${it.product_name} (${it.quantity} flak)`);
+
+    return {
+      "Order ID": o.id,
+      "Order Number": o.order_number,
+      "Order Date": o.order_date,
+      "Company": cust?.company_name ?? "",
+      "Contact Person": cust?.contact_person ?? "",
+      "Email": cust?.email ?? "",
+      "Phone": cust?.phone ?? "",
+      "Address": cust?.address ?? "",
+      "Org Number": o.orgNumber ?? "",
+      "Invoice Info": o.invoice ?? "",
+      "Delivery Date": o.delivery_date ?? "",
+      "Notes": o.notes ?? "",
+      "Items": items.join("; "),
+    };
+  });
+  
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+  XLSX.writeFile(workbook, "orders.xlsx");
+};
 
 export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
   const [companies, setCompanies] = useState<CustomerGroup[]>([]);
@@ -270,6 +301,9 @@ export function AdminCustomerOrders({ onClose }: { onClose: () => void }) {
               <p className="text-sm text-muted-foreground">Kunder & ordrar</p>
             </div>
           </div>
+          <Button onClick={() => exportOrdersToExcel(orders, orderItems)} className="mt-2">
+                Export to Excel
+              </Button>
         </div>
       </header>
 

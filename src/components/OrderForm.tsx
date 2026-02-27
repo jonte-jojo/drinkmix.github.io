@@ -10,6 +10,7 @@ import { ArrowLeft, Send, Building2, User, Mail, Phone, MapPin, FileText, Citrus
 import { useToast } from '@/hooks/use-toast';
 import emailjs from "@emailjs/browser";
 import { supabase } from "@/lib/supabase";
+import { useEffect } from "react";
 
 interface OrderFormProps {
   products: Product[];
@@ -18,6 +19,8 @@ interface OrderFormProps {
   onOrderComplete: () => void;
   onOrderItemsChange: (items: Record<string, number>) => void;
 }
+
+
 
 export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, onOrderComplete }: OrderFormProps) => {
   const { toast } = useToast();
@@ -37,6 +40,7 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
     deliveryDate: '',
   });
 
+  const [adminEmail, setAdminEmail] = useState<string>("");
 
   const normalize = (s?: string) => (s ?? "").toLowerCase();
   
@@ -110,6 +114,17 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
       });
       return;
     }
+
+    useEffect(() => {
+      const getUser = async () => {
+        const { data, error } = await supabase.auth.getUser();
+        if (!error && data.user) {
+          setAdminEmail(data.user.email ?? "");
+        }
+      };
+
+      getUser();
+    }, []);
     
   
     setIsSubmitting(true);
@@ -208,6 +223,7 @@ if (customerError) throw customerError;
         
       const emailParams = {
         to_email: customer.email,
+        admin_email: adminEmail,
         company: customer.companyName,
         contact: customer.contactPerson,
         order_number: orderNumber,

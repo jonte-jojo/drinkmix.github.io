@@ -41,6 +41,17 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
   });
 
   const [adminEmail, setAdminEmail] = useState<string>("");
+  useEffect(() => {
+      const getUser = async () => {
+        const { data, error } = await supabase.auth.getUser();
+        if (!error && data.user) {
+          setAdminEmail(data.user.email ?? "");
+        }
+      };
+
+      getUser();
+    }, []);
+
 
   const normalize = (s?: string) => (s ?? "").toLowerCase();
   
@@ -114,18 +125,6 @@ export const OrderForm = ({ products, orderItems, onOrderItemsChange, onBack, on
       });
       return;
     }
-
-    useEffect(() => {
-      const getUser = async () => {
-        const { data, error } = await supabase.auth.getUser();
-        if (!error && data.user) {
-          setAdminEmail(data.user.email ?? "");
-        }
-      };
-
-      getUser();
-    }, []);
-    
   
     setIsSubmitting(true);
   

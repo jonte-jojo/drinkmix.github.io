@@ -229,7 +229,7 @@ if (customerError) throw customerError;
         "Jontetest.drinkmix.se",     // ✅ SERVICE_ID
         "template_h792ji4",          // ✅ TEMPLATE_ID
         emailParams,
-        "dLeYvzovlKIZTi1fi"          // ✅ PUBLIC_KEY
+        "ejGAHYSgUfAMbHPJl"          // ✅ PUBLIC_KEY
       );
   
       console.log("EMAIL SENT SUCCESSFULLY");

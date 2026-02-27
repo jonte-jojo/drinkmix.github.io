@@ -211,7 +211,9 @@ if (customerError) throw customerError;
         .insert(itemsToInsert);
   
       if (itemsError) throw itemsError;
-  
+
+      const { data: userData } = await supabase.auth.getUser();
+      const currentAdminEmail = userData.user?.email ?? adminEmail ?? "";
       // ✅ 4) SEND EMAIL CONFIRMATION
       const orderLines = selectedProducts
         .map(({ product, quantity }) =>
@@ -219,10 +221,9 @@ if (customerError) throw customerError;
         )
         .join("\n");
         
-        
       const emailParams = {
         to_email: customer.email,
-        admin_email: adminEmail,
+        admin_email: currentAdminEmail,
         company: customer.companyName,
         contact: customer.contactPerson,
         order_number: orderNumber,
